@@ -1,0 +1,12 @@
+.results-lists {
+    display: flex;
+}
+
+.results-lists div {
+    flex-grow: 1;
+    width: 50%;
+}
+
+.results-lists ul {
+    padding-left: 15px;
+}

@@ -1,0 +1,7 @@
+.stats-table {
+    width: 100%;
+}
+
+.stats-table td {
+    width: 33%;
+}

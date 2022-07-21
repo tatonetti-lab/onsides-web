@@ -1,0 +1,32 @@
+.pagination {
+    margin: 5px auto;
+    text-align: center;
+    display: block;
+    width:fit-content;
+}
+
+.pagination a {
+    padding: 2px 8px;
+    margin:0px 5px;
+}
+
+.pagination-active {
+    background-color: #333;
+    border-radius: 7px;
+}
+
+.pagination-active a {
+    color: #fff !important;
+}
+
+.pagination-arrow {
+    text-decoration: none;
+    color: #333;
+    font-weight: bold;
+}
+
+ul.pagination-items {
+    columns: 2;
+    -webkit-columns: 2;
+    -moz-columns: 2;
+}

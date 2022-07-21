@@ -1,0 +1,53 @@
+.table-container {
+    overflow-x: auto;
+    max-height: 80vh;
+    overflow-y: scroll;
+}
+
+
+
+.table-container table thead {
+    position: sticky;
+    top:0;
+    z-index: 4;
+    background-color: #fff;
+}
+
+.table-container table thead th:first-child {
+    position: sticky;
+    left: 0;
+    z-index: 4 !important;
+    background-color: #fff;
+}
+
+.table-container table tbody .fixed-col {
+    position: sticky;
+    left: 0;
+    z-index: 2;
+    background-color: #fff;
+}
+
+.drug-info-table tbody tr {
+
+    border-top: 1px solid #c3c3c3;
+    border-bottom: 1px solid #c3c3c3;
+
+}
+
+.highlight {
+    background-color: #f2f2f2;
+}
+
+.drug-info-table tbody td:not(.fixed-col, .second-col) {
+    text-align: center;
+}
+
+.drug-info-table .second-col {
+    padding:0px 30px;
+    text-align: right;
+}
+
+.sorted-col {
+    cursor: pointer;
+    white-space: nowrap;
+}
