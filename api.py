@@ -1,8 +1,20 @@
 from flask import Blueprint, request, jsonify, send_file
 import MySQLdb
-from flask_mysqldb import MySQL
 
-mysql = MySQL()
+creds = {}
+with open('sql.conf', 'r') as file:
+    content = file.readlines()
+    for line in content:
+        key, value = line.split("=")
+        creds[key.strip()] = value.strip()
+
+
+mysql = MySQLdb.connect(
+    host=creds["MYSQL_HOST"],
+    user=creds["MYSQL_USER"],
+    password=creds["MYSQL_PASSWORD"],
+    db=creds["MYSQL_DB"]
+)
 
 api = Blueprint('api', __name__,
                 template_folder='./frontend/build',
@@ -11,8 +23,8 @@ api = Blueprint('api', __name__,
 # returns list of all drug names and id sorted by name alphabetically
 @api.route("/api/drugs")
 def get_all_drugs():
-    conn = mysql.connection
-    cursor = conn.cursor(MySQLdb.cursors.DictCursor)
+ 
+    cursor = mysql.cursor(MySQLdb.cursors.DictCursor)
     cursor.execute(
         "SELECT DISTINCT ingredient_concept_name, ingredient_concept_id FROM ingredients ORDER BY ingredient_concept_name")
 
@@ -25,8 +37,8 @@ def get_all_drugs():
 # returns list of all adverse reactions name and id sorted by name alphabetically
 @api.route("/api/adversereactions")
 def get_all_adverseReactions():
-    conn = mysql.connection
-    cursor = conn.cursor(MySQLdb.cursors.DictCursor)
+  
+    cursor = mysql.cursor(MySQLdb.cursors.DictCursor)
     cursor.execute(
         "SELECT DISTINCT concept_name, meddra_id FROM adverse_reactions ORDER BY concept_name")
 
@@ -39,8 +51,8 @@ def get_all_adverseReactions():
 # returns lists of drugs and adverse reactions, both with name and id
 @api.route("/api/query/<keyword>")
 def query_keyword(keyword):
-    conn = mysql.connection
-    cursor = conn.cursor(MySQLdb.cursors.DictCursor)
+ 
+    cursor = mysql.cursor(MySQLdb.cursors.DictCursor)
 
     cursor.execute("SELECT DISTINCT ingredient_concept_name, ingredient_concept_id FROM ingredients WHERE ingredient_concept_name LIKE %s ORDER BY ingredient_concept_name", ("%" + keyword + "%",))
 
@@ -60,8 +72,7 @@ def query_keyword(keyword):
 @api.route("/api/adversereactions/<meddraID>")
 def getDrugsByAdverseReaction(meddraID):
 
-    conn = mysql.connection
-    cursor = conn.cursor(MySQLdb.cursors.DictCursor)
+    cursor = mysql.cursor(MySQLdb.cursors.DictCursor)
 
     # get adverse reaction name
     cursor.execute(
@@ -89,8 +100,7 @@ def getDrugsByAdverseReaction(meddraID):
 # returns drug name, list of unique drug labels, list of adverse reactions and drug labels associated with it
 @api.route("/api/drugs/<drugID>")
 def getDrugInfo(drugID):
-    conn = mysql.connection
-    cursor = conn.cursor(MySQLdb.cursors.DictCursor)
+    cursor = mysql.cursor(MySQLdb.cursors.DictCursor)
 
     # get drug name
     cursor.execute(
@@ -189,14 +199,16 @@ def getDrugInfo(drugID):
 # stats
 @api.route("/api/stats")
 def getStats():
-    conn = mysql.connection
-    cursor = conn.cursor()
+
+    cursor = mysql.cursor()
 
     # total drugs
     cursor.execute(
         "SELECT COUNT( DISTINCT ingredient_concept_name ) FROM ingredients")
     num_drugs = cursor.fetchall()
 
+
+    
     # total adv reactions
     cursor.execute(
         "SELECT COUNT( DISTINCT concept_name ) FROM adverse_reactions")

@@ -13,14 +13,14 @@ app = Flask(__name__, static_url_path='/public',
 template_folder='./frontend/build', static_folder='./frontend/build/static')
 
 
-#CORS(app)  # comment this on deployment
+CORS(app)  # comment this on deployment
 
 
 
 app.config['MYSQL_HOST'] = 'localhost'
 #app.config['MYSQL_PORT'] = 3306
 app.config['MYSQL_USER'] = 'dm3786'
-app.config['MYSQL_PASSWORD'] = ''
+app.config['MYSQL_PASSWORD'] = 'Jan3appleseed23!ß'
 app.config['MYSQL_DB'] = 'onsidesdb'
 
 '''
