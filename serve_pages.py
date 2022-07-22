@@ -7,7 +7,8 @@ serve_pages = Blueprint('serve_pages', __name__,
                         template_folder='frontend/build',
                         static_folder='frontend/build/static')
                         #name of the blueprint is what you will use in the html
-list_of_build_files = set(os.listdir('frontend/build'))
+#print(os.getcwd())
+list_of_build_files = set(os.listdir('/var/www/onsides.tatonettilab.org/frontend/build'))
 
 
 @serve_pages.route('/', defaults={'path':''})

@@ -1,6 +1,8 @@
 from flask import Blueprint, request, jsonify, send_file
-from app import mysql
 import MySQLdb
+from flask_mysqldb import MySQL
+
+mysql = MySQL()
 
 api = Blueprint('api', __name__,
                 template_folder='./frontend/build',

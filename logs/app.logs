@@ -1,0 +1,109 @@
+[Fri Jul 22 14:27:41.301491 2022] [wsgi:error] [pid 2265479] [remote 156.111.111.159:27736] mod_wsgi (pid=2265479): Failed to exec Python script file '/var/www/onsides.tatonettilab.org/app.wsgi'.
+[Fri Jul 22 14:27:41.301534 2022] [wsgi:error] [pid 2265479] [remote 156.111.111.159:27736] mod_wsgi (pid=2265479): Exception occurred processing WSGI script '/var/www/onsides.tatonettilab.org/app.wsgi'.
+[Fri Jul 22 14:27:41.301556 2022] [wsgi:error] [pid 2265479] [remote 156.111.111.159:27736] Traceback (most recent call last):
+[Fri Jul 22 14:27:41.301573 2022] [wsgi:error] [pid 2265479] [remote 156.111.111.159:27736]   File "/var/www/onsides.tatonettilab.org/app.wsgi", line 6, in <module>
+[Fri Jul 22 14:27:41.301619 2022] [wsgi:error] [pid 2265479] [remote 156.111.111.159:27736]     logging.basicConfig(level=logging.DEBUG, filename='var/www/html/tatonettilab.org/logs/app.logs', format='%(asctime)s %(message)s')
+[Fri Jul 22 14:27:41.301631 2022] [wsgi:error] [pid 2265479] [remote 156.111.111.159:27736]   File "/usr/lib/python2.7/logging/__init__.py", line 1554, in basicConfig
+[Fri Jul 22 14:27:41.304569 2022] [wsgi:error] [pid 2265479] [remote 156.111.111.159:27736]     hdlr = FileHandler(filename, mode)
+[Fri Jul 22 14:27:41.304588 2022] [wsgi:error] [pid 2265479] [remote 156.111.111.159:27736]   File "/usr/lib/python2.7/logging/__init__.py", line 920, in __init__
+[Fri Jul 22 14:27:41.304609 2022] [wsgi:error] [pid 2265479] [remote 156.111.111.159:27736]     StreamHandler.__init__(self, self._open())
+[Fri Jul 22 14:27:41.304618 2022] [wsgi:error] [pid 2265479] [remote 156.111.111.159:27736]   File "/usr/lib/python2.7/logging/__init__.py", line 950, in _open
+[Fri Jul 22 14:27:41.304630 2022] [wsgi:error] [pid 2265479] [remote 156.111.111.159:27736]     stream = open(self.baseFilename, self.mode)
+[Fri Jul 22 14:27:41.304647 2022] [wsgi:error] [pid 2265479] [remote 156.111.111.159:27736] IOError: [Errno 2] No such file or directory: '/var/www/html/tatonettilab.org/logs/app.logs'
+[Fri Jul 22 14:29:59.674021 2022] [wsgi:error] [pid 2265479] [remote 156.111.111.159:25672] mod_wsgi (pid=2265479): Failed to exec Python script file '/var/www/onsides.tatonettilab.org/app.wsgi'.
+[Fri Jul 22 14:29:59.674057 2022] [wsgi:error] [pid 2265479] [remote 156.111.111.159:25672] mod_wsgi (pid=2265479): Exception occurred processing WSGI script '/var/www/onsides.tatonettilab.org/app.wsgi'.
+[Fri Jul 22 14:29:59.674078 2022] [wsgi:error] [pid 2265479] [remote 156.111.111.159:25672] Traceback (most recent call last):
+[Fri Jul 22 14:29:59.674102 2022] [wsgi:error] [pid 2265479] [remote 156.111.111.159:25672]   File "/var/www/onsides.tatonettilab.org/app.wsgi", line 6, in <module>
+[Fri Jul 22 14:29:59.674347 2022] [wsgi:error] [pid 2265479] [remote 156.111.111.159:25672]     logging.basicConfig(level=logging.DEBUG, filename='var/www/tatonettilab.org/logs/app.logs', format='%(asctime)s %(message)s')
+[Fri Jul 22 14:29:59.674362 2022] [wsgi:error] [pid 2265479] [remote 156.111.111.159:25672]   File "/usr/lib/python2.7/logging/__init__.py", line 1554, in basicConfig
+[Fri Jul 22 14:29:59.674383 2022] [wsgi:error] [pid 2265479] [remote 156.111.111.159:25672]     hdlr = FileHandler(filename, mode)
+[Fri Jul 22 14:29:59.674393 2022] [wsgi:error] [pid 2265479] [remote 156.111.111.159:25672]   File "/usr/lib/python2.7/logging/__init__.py", line 920, in __init__
+[Fri Jul 22 14:29:59.674405 2022] [wsgi:error] [pid 2265479] [remote 156.111.111.159:25672]     StreamHandler.__init__(self, self._open())
+[Fri Jul 22 14:29:59.674413 2022] [wsgi:error] [pid 2265479] [remote 156.111.111.159:25672]   File "/usr/lib/python2.7/logging/__init__.py", line 950, in _open
+[Fri Jul 22 14:29:59.674424 2022] [wsgi:error] [pid 2265479] [remote 156.111.111.159:25672]     stream = open(self.baseFilename, self.mode)
+[Fri Jul 22 14:29:59.674444 2022] [wsgi:error] [pid 2265479] [remote 156.111.111.159:25672] IOError: [Errno 2] No such file or directory: '/var/www/tatonettilab.org/logs/app.logs'
+[Fri Jul 22 14:31:18.501203 2022] [wsgi:error] [pid 2265479] [remote 156.111.111.159:25845] mod_wsgi (pid=2265479): Failed to exec Python script file '/var/www/onsides.tatonettilab.org/app.wsgi'.
+[Fri Jul 22 14:31:18.501246 2022] [wsgi:error] [pid 2265479] [remote 156.111.111.159:25845] mod_wsgi (pid=2265479): Exception occurred processing WSGI script '/var/www/onsides.tatonettilab.org/app.wsgi'.
+[Fri Jul 22 14:31:18.501267 2022] [wsgi:error] [pid 2265479] [remote 156.111.111.159:25845] Traceback (most recent call last):
+[Fri Jul 22 14:31:18.501289 2022] [wsgi:error] [pid 2265479] [remote 156.111.111.159:25845]   File "/var/www/onsides.tatonettilab.org/app.wsgi", line 6, in <module>
+[Fri Jul 22 14:31:18.501352 2022] [wsgi:error] [pid 2265479] [remote 156.111.111.159:25845]     logging.basicConfig(level=logging.DEBUG, filename='var/www/onsides.tatonettilab.org/logs/app.logs', format='%(asctime)s %(message)s')
+[Fri Jul 22 14:31:18.501365 2022] [wsgi:error] [pid 2265479] [remote 156.111.111.159:25845]   File "/usr/lib/python2.7/logging/__init__.py", line 1554, in basicConfig
+[Fri Jul 22 14:31:18.501386 2022] [wsgi:error] [pid 2265479] [remote 156.111.111.159:25845]     hdlr = FileHandler(filename, mode)
+[Fri Jul 22 14:31:18.501395 2022] [wsgi:error] [pid 2265479] [remote 156.111.111.159:25845]   File "/usr/lib/python2.7/logging/__init__.py", line 920, in __init__
+[Fri Jul 22 14:31:18.501407 2022] [wsgi:error] [pid 2265479] [remote 156.111.111.159:25845]     StreamHandler.__init__(self, self._open())
+[Fri Jul 22 14:31:18.501415 2022] [wsgi:error] [pid 2265479] [remote 156.111.111.159:25845]   File "/usr/lib/python2.7/logging/__init__.py", line 950, in _open
+[Fri Jul 22 14:31:18.501426 2022] [wsgi:error] [pid 2265479] [remote 156.111.111.159:25845]     stream = open(self.baseFilename, self.mode)
+[Fri Jul 22 14:31:18.501446 2022] [wsgi:error] [pid 2265479] [remote 156.111.111.159:25845] IOError: [Errno 13] Permission denied: '/var/www/onsides.tatonettilab.org/logs/app.logs'
+[Fri Jul 22 14:32:58.516740 2022] [wsgi:error] [pid 2265479] [remote 156.111.111.159:41649] mod_wsgi (pid=2265479): Failed to exec Python script file '/var/www/onsides.tatonettilab.org/app.wsgi'.
+[Fri Jul 22 14:32:58.516771 2022] [wsgi:error] [pid 2265479] [remote 156.111.111.159:41649] mod_wsgi (pid=2265479): Exception occurred processing WSGI script '/var/www/onsides.tatonettilab.org/app.wsgi'.
+[Fri Jul 22 14:32:58.516802 2022] [wsgi:error] [pid 2265479] [remote 156.111.111.159:41649] Traceback (most recent call last):
+[Fri Jul 22 14:32:58.516827 2022] [wsgi:error] [pid 2265479] [remote 156.111.111.159:41649]   File "/var/www/onsides.tatonettilab.org/app.wsgi", line 10, in <module>
+[Fri Jul 22 14:32:58.516900 2022] [wsgi:error] [pid 2265479] [remote 156.111.111.159:41649]     from app import app as application
+[Fri Jul 22 14:32:58.516913 2022] [wsgi:error] [pid 2265479] [remote 156.111.111.159:41649]   File "/var/www/onsides.tatonettilab.org/app.py", line 2, in <module>
+[Fri Jul 22 14:32:58.516951 2022] [wsgi:error] [pid 2265479] [remote 156.111.111.159:41649]     import MySQLdb
+[Fri Jul 22 14:32:58.516973 2022] [wsgi:error] [pid 2265479] [remote 156.111.111.159:41649] ImportError: No module named MySQLdb
+[Fri Jul 22 14:41:03.633758 2022] [wsgi:error] [pid 2265479] [remote 156.111.111.159:22215] mod_wsgi (pid=2265479): Failed to exec Python script file '/var/www/onsides.tatonettilab.org/app.wsgi'.
+[Fri Jul 22 14:41:03.633807 2022] [wsgi:error] [pid 2265479] [remote 156.111.111.159:22215] mod_wsgi (pid=2265479): Exception occurred processing WSGI script '/var/www/onsides.tatonettilab.org/app.wsgi'.
+[Fri Jul 22 14:41:03.633834 2022] [wsgi:error] [pid 2265479] [remote 156.111.111.159:22215] Traceback (most recent call last):
+[Fri Jul 22 14:41:03.633861 2022] [wsgi:error] [pid 2265479] [remote 156.111.111.159:22215]   File "/var/www/onsides.tatonettilab.org/app.wsgi", line 10, in <module>
+[Fri Jul 22 14:41:03.635609 2022] [wsgi:error] [pid 2265479] [remote 156.111.111.159:22215]     from app import app as application
+[Fri Jul 22 14:41:03.635629 2022] [wsgi:error] [pid 2265479] [remote 156.111.111.159:22215]   File "/var/www/onsides.tatonettilab.org/app.py", line 2, in <module>
+[Fri Jul 22 14:41:03.635664 2022] [wsgi:error] [pid 2265479] [remote 156.111.111.159:22215]     import MySQLdb
+[Fri Jul 22 14:41:03.635688 2022] [wsgi:error] [pid 2265479] [remote 156.111.111.159:22215] ImportError: No module named MySQLdb
+[Fri Jul 22 14:45:36.572105 2022] [wsgi:error] [pid 2265479] [remote 156.111.111.159:13162] mod_wsgi (pid=2265479): Failed to exec Python script file '/var/www/onsides.tatonettilab.org/app.wsgi'.
+[Fri Jul 22 14:45:36.572135 2022] [wsgi:error] [pid 2265479] [remote 156.111.111.159:13162] mod_wsgi (pid=2265479): Exception occurred processing WSGI script '/var/www/onsides.tatonettilab.org/app.wsgi'.
+[Fri Jul 22 14:45:36.572158 2022] [wsgi:error] [pid 2265479] [remote 156.111.111.159:13162] Traceback (most recent call last):
+[Fri Jul 22 14:45:36.572184 2022] [wsgi:error] [pid 2265479] [remote 156.111.111.159:13162]   File "/var/www/onsides.tatonettilab.org/app.wsgi", line 10, in <module>
+[Fri Jul 22 14:45:36.572273 2022] [wsgi:error] [pid 2265479] [remote 156.111.111.159:13162]     from app import app as application
+[Fri Jul 22 14:45:36.572286 2022] [wsgi:error] [pid 2265479] [remote 156.111.111.159:13162]   File "/var/www/onsides.tatonettilab.org/app.py", line 2, in <module>
+[Fri Jul 22 14:45:36.572304 2022] [wsgi:error] [pid 2265479] [remote 156.111.111.159:13162]     import MySQLdb
+[Fri Jul 22 14:45:36.572325 2022] [wsgi:error] [pid 2265479] [remote 156.111.111.159:13162] ImportError: No module named MySQLdb
+[Fri Jul 22 14:46:08.234486 2022] [wsgi:error] [pid 2265479] [remote 156.111.111.159:2241] mod_wsgi (pid=2265479): Failed to exec Python script file '/var/www/onsides.tatonettilab.org/app.wsgi'.
+[Fri Jul 22 14:46:08.234517 2022] [wsgi:error] [pid 2265479] [remote 156.111.111.159:2241] mod_wsgi (pid=2265479): Exception occurred processing WSGI script '/var/www/onsides.tatonettilab.org/app.wsgi'.
+[Fri Jul 22 14:46:08.234545 2022] [wsgi:error] [pid 2265479] [remote 156.111.111.159:2241] Traceback (most recent call last):
+[Fri Jul 22 14:46:08.234572 2022] [wsgi:error] [pid 2265479] [remote 156.111.111.159:2241]   File "/var/www/onsides.tatonettilab.org/app.wsgi", line 10, in <module>
+[Fri Jul 22 14:46:08.234610 2022] [wsgi:error] [pid 2265479] [remote 156.111.111.159:2241]     from app import app as application
+[Fri Jul 22 14:46:08.234620 2022] [wsgi:error] [pid 2265479] [remote 156.111.111.159:2241]   File "/var/www/onsides.tatonettilab.org/app.py", line 3, in <module>
+[Fri Jul 22 14:46:08.234684 2022] [wsgi:error] [pid 2265479] [remote 156.111.111.159:2241]     from flask import Flask, send_from_directory
+[Fri Jul 22 14:46:08.234707 2022] [wsgi:error] [pid 2265479] [remote 156.111.111.159:2241] ImportError: No module named flask
+[Fri Jul 22 14:49:28.010553 2022] [wsgi:error] [pid 2266116] [remote 156.111.111.159:26661] mod_wsgi (pid=2266116): Failed to exec Python script file '/var/www/onsides.tatonettilab.org/app.wsgi'.
+[Fri Jul 22 14:49:28.012782 2022] [wsgi:error] [pid 2266116] [remote 156.111.111.159:26661] mod_wsgi (pid=2266116): Exception occurred processing WSGI script '/var/www/onsides.tatonettilab.org/app.wsgi'.
+[Fri Jul 22 14:49:28.014412 2022] [wsgi:error] [pid 2266116] [remote 156.111.111.159:26661] Traceback (most recent call last):
+[Fri Jul 22 14:49:28.014452 2022] [wsgi:error] [pid 2266116] [remote 156.111.111.159:26661]   File "/var/www/onsides.tatonettilab.org/app.wsgi", line 10, in <module>
+[Fri Jul 22 14:49:28.014458 2022] [wsgi:error] [pid 2266116] [remote 156.111.111.159:26661]     from app import app as application
+[Fri Jul 22 14:49:28.014467 2022] [wsgi:error] [pid 2266116] [remote 156.111.111.159:26661]   File "/var/www/onsides.tatonettilab.org/app.py", line 33, in <module>
+[Fri Jul 22 14:49:28.014472 2022] [wsgi:error] [pid 2266116] [remote 156.111.111.159:26661]     from serve_pages import serve_pages
+[Fri Jul 22 14:49:28.014479 2022] [wsgi:error] [pid 2266116] [remote 156.111.111.159:26661]   File "/var/www/onsides.tatonettilab.org/serve_pages.py", line 10, in <module>
+[Fri Jul 22 14:49:28.014484 2022] [wsgi:error] [pid 2266116] [remote 156.111.111.159:26661]     list_of_build_files = set(os.listdir('frontend/build'))
+[Fri Jul 22 14:49:28.014517 2022] [wsgi:error] [pid 2266116] [remote 156.111.111.159:26661] FileNotFoundError: [Errno 2] No such file or directory: 'frontend/build'
+[Fri Jul 22 14:51:35.315974 2022] [wsgi:error] [pid 2266116] [remote 156.111.111.159:22072] mod_wsgi (pid=2266116): Failed to exec Python script file '/var/www/onsides.tatonettilab.org/app.wsgi'.
+[Fri Jul 22 14:51:35.316854 2022] [wsgi:error] [pid 2266116] [remote 156.111.111.159:22072] mod_wsgi (pid=2266116): Exception occurred processing WSGI script '/var/www/onsides.tatonettilab.org/app.wsgi'.
+[Fri Jul 22 14:51:35.317092 2022] [wsgi:error] [pid 2266116] [remote 156.111.111.159:22072] Traceback (most recent call last):
+[Fri Jul 22 14:51:35.317134 2022] [wsgi:error] [pid 2266116] [remote 156.111.111.159:22072]   File "/var/www/onsides.tatonettilab.org/app.wsgi", line 10, in <module>
+[Fri Jul 22 14:51:35.317141 2022] [wsgi:error] [pid 2266116] [remote 156.111.111.159:22072]     from app import app as application
+[Fri Jul 22 14:51:35.317149 2022] [wsgi:error] [pid 2266116] [remote 156.111.111.159:22072]   File "/var/www/onsides.tatonettilab.org/app.py", line 33, in <module>
+[Fri Jul 22 14:51:35.317154 2022] [wsgi:error] [pid 2266116] [remote 156.111.111.159:22072]     from serve_pages import serve_pages
+[Fri Jul 22 14:51:35.317162 2022] [wsgi:error] [pid 2266116] [remote 156.111.111.159:22072]   File "/var/www/onsides.tatonettilab.org/serve_pages.py", line 10, in <module>
+[Fri Jul 22 14:51:35.317166 2022] [wsgi:error] [pid 2266116] [remote 156.111.111.159:22072]     list_of_build_files = set(os.listdir('./frontend/build'))
+[Fri Jul 22 14:51:35.317185 2022] [wsgi:error] [pid 2266116] [remote 156.111.111.159:22072] FileNotFoundError: [Errno 2] No such file or directory: './frontend/build'
+[Fri Jul 22 14:54:37.787184 2022] [wsgi:error] [pid 2266116] /
+[Fri Jul 22 14:54:37.787256 2022] [wsgi:error] [pid 2266116] [remote 156.111.111.159:40557] mod_wsgi (pid=2266116): Failed to exec Python script file '/var/www/onsides.tatonettilab.org/app.wsgi'.
+[Fri Jul 22 14:54:37.787288 2022] [wsgi:error] [pid 2266116] [remote 156.111.111.159:40557] mod_wsgi (pid=2266116): Exception occurred processing WSGI script '/var/www/onsides.tatonettilab.org/app.wsgi'.
+[Fri Jul 22 14:54:37.787677 2022] [wsgi:error] [pid 2266116] [remote 156.111.111.159:40557] Traceback (most recent call last):
+[Fri Jul 22 14:54:37.788802 2022] [wsgi:error] [pid 2266116] [remote 156.111.111.159:40557]   File "/var/www/onsides.tatonettilab.org/app.wsgi", line 10, in <module>
+[Fri Jul 22 14:54:37.788812 2022] [wsgi:error] [pid 2266116] [remote 156.111.111.159:40557]     from app import app as application
+[Fri Jul 22 14:54:37.788820 2022] [wsgi:error] [pid 2266116] [remote 156.111.111.159:40557]   File "/var/www/onsides.tatonettilab.org/app.py", line 33, in <module>
+[Fri Jul 22 14:54:37.788825 2022] [wsgi:error] [pid 2266116] [remote 156.111.111.159:40557]     from serve_pages import serve_pages
+[Fri Jul 22 14:54:37.788832 2022] [wsgi:error] [pid 2266116] [remote 156.111.111.159:40557]   File "/var/www/onsides.tatonettilab.org/serve_pages.py", line 11, in <module>
+[Fri Jul 22 14:54:37.788837 2022] [wsgi:error] [pid 2266116] [remote 156.111.111.159:40557]     list_of_build_files = set(os.listdir('./frontend/build'))
+[Fri Jul 22 14:54:37.788855 2022] [wsgi:error] [pid 2266116] [remote 156.111.111.159:40557] FileNotFoundError: [Errno 2] No such file or directory: './frontend/build'
+[Fri Jul 22 14:57:21.111599 2022] [wsgi:error] [pid 2266116] [remote 156.111.111.159:48041] 
+[Fri Jul 22 14:57:21.162312 2022] [wsgi:error] [pid 2266116] [remote 156.111.111.159:39947] manifest.json
+[Fri Jul 22 14:57:51.864301 2022] [wsgi:error] [pid 2266116] [remote 156.111.111.159:10938] download
+[Fri Jul 22 14:57:51.906080 2022] [wsgi:error] [pid 2266116] [remote 156.111.111.159:50575] manifest.json
+[Fri Jul 22 14:57:54.667298 2022] [wsgi:error] [pid 2266116] [remote 156.111.111.159:1828] adverse
+[Fri Jul 22 14:57:54.695249 2022] [wsgi:error] [pid 2266116] [remote 156.111.111.159:50575] manifest.json
+[Fri Jul 22 14:57:56.624207 2022] [wsgi:error] [pid 2266116] [remote 156.111.111.159:1828] drugs
+[Fri Jul 22 14:57:56.650478 2022] [wsgi:error] [pid 2266116] [remote 156.111.111.159:50575] manifest.json
+[Fri Jul 22 14:57:57.363455 2022] [wsgi:error] [pid 2266116] [remote 156.111.111.159:1828] 
+[Fri Jul 22 14:57:57.386757 2022] [wsgi:error] [pid 2266116] [remote 156.111.111.159:50575] manifest.json
