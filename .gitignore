@@ -26,3 +26,7 @@ venv/
 
 .env
 sql.conf
+sql_script/
+
+logs/access.logs
+logs/app.logs

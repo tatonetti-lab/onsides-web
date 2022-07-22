@@ -2,18 +2,21 @@ from flask import Blueprint, request, jsonify, send_file
 import MySQLdb
 
 creds = {}
-with open('sql.conf', 'r') as file:
+with open('/var/www/onsides.tatonettilab.org/sql.conf', 'r') as file:
     content = file.readlines()
     for line in content:
         key, value = line.split("=")
         creds[key.strip()] = value.strip()
 
 
+#print(creds["MYSQL_HOST"], creds["MYSQL_USER"], creds["MYSQL_PASSWORD"], creds["MYSQL_DB"], int(creds["MYSQL_PORT"]));
+
 mysql = MySQLdb.connect(
     host=creds["MYSQL_HOST"],
     user=creds["MYSQL_USER"],
     password=creds["MYSQL_PASSWORD"],
-    db=creds["MYSQL_DB"]
+    db=creds["MYSQL_DB"],
+    port=int(creds["MYSQL_PORT"]),
 )
 
 api = Blueprint('api', __name__,
@@ -217,6 +220,8 @@ def getStats():
     # total drugs/adv reactions pairs
     cursor.execute("SELECT COUNT( * ) FROM adverse_reactions")
     num_pairs = cursor.fetchall()
+
+    print(num_adverse_reactions, num_pairs, num_drugs)
 
     return {
         "drugs": num_drugs,
