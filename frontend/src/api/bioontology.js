@@ -3,7 +3,8 @@ import axios from "axios";
 axios.defaults.headers["Authorization"] = "apikey token=c604582c-e8e6-4a84-8c0d-4264fcb526ca";
 
 const getCUI = (term_name) => {
-    return axios.get("http://data.bioontology.org/search?q=" + term_name, {
+    return axios.get("https://data.bioontology.org/search?q=" + term_name, 
+{
         params: {
             ontologies: "MEDDRA",
             require_exact_match: true,
