@@ -14,7 +14,7 @@ const getCUI = (term_name) => {
 }
 
 const searchByCUI = (cui) => {
-    return axios.get("http://data.bioontology.org/search?q=" + cui, {
+    return axios.get("https://data.bioontology.org/search?q=" + cui, {
         params: {
             ontologies: "NCIT",
             also_search_properties:true,
@@ -26,7 +26,8 @@ const searchByCUI = (cui) => {
 }
 
 const searchByName = (term_name) => {
-    return axios.get("http://data.bioontology.org/search?q=" + term_name, {
+    return axios.get("https://data.bioontology.org/search?q=" + term_name, 
+{
         params: {
             ontologies: "NCIT",
             require_exact_match:true,
