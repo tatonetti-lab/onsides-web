@@ -25,6 +25,7 @@ export default function Search() {
     const [queryValue, setQueryValue] = useState("")
     const [drugsResults, setDrugsResults] = useState([]);
     const [reactionsResults, setReactionsResults] = useState([]);
+    const [timer, setTimer] = useState(null);
 
     // go to search results page
     const handleSubmit = (event) => {
@@ -38,18 +39,28 @@ export default function Search() {
     }
 
     const handleChange = (event) => {
-        let query = event.target.value;
-        setQueryValue( query );
+        let query = event.target.value.toLowerCase();
+	let prevQueryValue = queryValue;
+        console.log("handling query " + query);
 
+	setQueryValue( query );
+        
         if (query.length >= 3) {
 
-            queryKeyword(query)
-            .then(res => {
+		clearTimeout(timer);
 
-                setDrugsResults( res.drugs.slice(0, 11) )       
-                setReactionsResults( res.adverse_reactions.slice(0, 11) );
+		const newTimer = setTimeout(() => {
+		    console.log("api call");
+            	    queryKeyword(query)
+            	        .then(res => {
 
-            })
+                	    setDrugsResults( res.drugs )       
+                	    setReactionsResults( res.adverse_reactions );
+
+            	        })
+		}, 500)
+
+                setTimer(newTimer);
 
             popupResults.current.style.display = "block";
 
@@ -60,6 +71,8 @@ export default function Search() {
 
             popupResults.current.style.display = "none";
         }
+
+
     }
 
     return (
@@ -77,7 +90,7 @@ export default function Search() {
                 <Col xs={9}>
                 <div ref={popupResults} className="popup-search-results">
 
-                    <SearchResultsLists drugsResults={drugsResults} reactionsResults={reactionsResults} />
+                    <SearchResultsLists drugsResults={drugsResults.slice(0,11)} reactionsResults={reactionsResults.slice(0,11)} />
 
                     <a href="#" onClick={handleSubmit}> See all results </a>
                     

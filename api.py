@@ -17,6 +17,7 @@ mysql = MySQLdb.connect(
     password=creds["MYSQL_PASSWORD"],
     db=creds["MYSQL_DB"],
     port=int(creds["MYSQL_PORT"]),
+    connect_timeout=100,
 )
 
 api = Blueprint('api', __name__,
