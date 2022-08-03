@@ -75,6 +75,7 @@ export default function Drug() {
     }
 
     useMemo(() => {
+
         let sortedProducts = [...drug];
         if (sortConfig.key !== null) {
             sortedProducts.sort((a, b) => {
@@ -88,10 +89,7 @@ export default function Drug() {
             });
         }
 
-        let drug_temp = drug;
-        drug_temp.info = sortedProducts;
-
-        setDrug(drug_temp);
+        setDrug( sortedProducts );
 
         return sortedProducts;
     }, [sortConfig]);
@@ -111,7 +109,7 @@ export default function Drug() {
                             <table ref={table} className="drug-info-table">
                                 <thead>
                                     <tr>
-                                        <th onClick={() => handleSort("name")} className="sorted-col fixed-col"> <h5>Adverse Effects <AiOutlineSortAscending /></h5> </th>
+                                        <th onClick={() => handleSort("concept_name")} className="sorted-col fixed-col"> <h5>Adverse Effects <AiOutlineSortAscending /></h5> </th>
                                         <th onClick={() => handleSort("percent")} className="sorted-col second-col"> <h5> Stats <BsSortNumericDown />
 
                                             <OverlayTrigger
@@ -143,7 +141,11 @@ export default function Drug() {
                                                         <Tooltip>
                                                             <span>
 
-                                                                {item.desc}
+                                                                {item.rx_string}
+
+                                                                <br/> <br/>
+
+                                                                {item.spl_version}
                                                                 
                                                             </span>
                                                         </Tooltip>}
@@ -157,10 +159,10 @@ export default function Drug() {
                                 </thead>
                                 <tbody>
                                     {drug.map((item) => (
-                                        <tr key={item.meddra_id}>
+                                        <tr key={item.concept_code}>
                                             <td className="fixed-col">
                                                 
-                                                    <span><Link to={"/adverse/"+item.meddra_id}>{item.concept_name}</Link></span>
+                                                    <span><Link to={"/adverse/"+item.concept_code}>{item.concept_name}</Link></span>
                                                 
 
 
@@ -168,7 +170,7 @@ export default function Drug() {
                                             <td className="second-col"> {item.percent}% </td>
 
                                             {drugLabels.map((label_item) => (
-                                                <td onMouseEnter={addColumnHighlight} onMouseLeave={removeColumnHighlight} className={label_item.xml_id} key={label_item.xml_id}> {item.xml_id.includes(label_item.xml_id) ? <AiOutlineCheck /> : ""}</td>
+                                                <td onMouseEnter={addColumnHighlight} onMouseLeave={removeColumnHighlight} className={label_item.xml_id} key={label_item.xml_id}> {item.xml_ids.includes(label_item.xml_id) ? <AiOutlineCheck /> : ""}</td>
                                             ))}
                                         </tr>
                                     ))}

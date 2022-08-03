@@ -1,6 +1,6 @@
 import axios from "axios"
 
-axios.defaults.baseURL = 'https://onsides.tatonettilab.org/api';
+axios.defaults.baseURL = 'http://127.0.0.1:8888/api';
 
 export const getAllDrugs = () => {
     return axios.get("/drugs")

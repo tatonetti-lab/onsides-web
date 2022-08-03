@@ -2,7 +2,7 @@ from flask import Blueprint, request, jsonify, send_file
 import MySQLdb
 
 creds = {}
-with open('/var/www/onsides.tatonettilab.org/sql.conf', 'r') as file:
+with open('sql.conf', 'r') as file:
     content = file.readlines()
     for line in content:
         key, value = line.split("=")
@@ -16,7 +16,7 @@ mysql = MySQLdb.connect(
     user=creds["MYSQL_USER"],
     password=creds["MYSQL_PASSWORD"],
     db=creds["MYSQL_DB"],
-    port=int(creds["MYSQL_PORT"]),
+   #port=int(creds["MYSQL_PORT"]),
     connect_timeout=100,
 )
 
@@ -101,6 +101,106 @@ def getDrugsByAdverseReaction(meddraID):
     }
 
 
+@api.route("/api/drugs/<drugID>")
+def getDrugInfo(drugID):
+    cursor = mysql.cursor(MySQLdb.cursors.DictCursor)
+
+    # get drug name and all of its xml_ids
+    cursor.execute(
+        "SELECT ingredient_concept_name, xml_id FROM ingredients WHERE ingredient_concept_id = %s", 
+        (drugID,)
+    )
+    drug_result = cursor.fetchall()
+
+    # if no drug exists return
+    if (len(drug_result) == 0):
+        return {
+            "drug_name": None,
+            "drug_info": None
+        }
+
+    drug_name = drug_result[0]["ingredient_concept_name"]
+    print(drug_name)
+    print()
+
+    drug_info_by_adverse_reaction = {}
+
+    drug_labels = []
+
+    print(len(drug_result))
+    for drug_product in drug_result:
+
+        xml_id = drug_product["xml_id"]
+
+        # get set id and such
+        cursor.execute("""
+            SELECT rx_string, spl_version FROM rxnorm_map WHERE rx_tty = 'PSN' AND set_id IN (
+                SELECT set_id FROM label_map WHERE xml_id = %s
+            ) ORDER BY rx_string
+        """, (xml_id,))
+
+        label = cursor.fetchall()
+
+        # if product is not part of kit
+        if (len(label) == 1):
+
+            drug_labels.append( {
+                'xml_id': xml_id,
+                'rx_string': label[0]['rx_string'],
+                'spl_version': label[0]['spl_version'],
+            })
+            
+            #print(label[0]['rx_string'])
+            #print("xml_id: ", xml_id)
+            #print()
+
+            cursor.execute(""" 
+                SELECT concept_name, concept_code FROM adverse_reactions_bylabel WHERE xml_id = %s
+            """, (xml_id,))
+
+            adverse_reactions = cursor.fetchall()
+
+            print(len(adverse_reactions))
+
+            for item in adverse_reactions:
+
+                name = item['concept_name']
+
+                if (name in drug_info_by_adverse_reaction):
+                    drug_info_by_adverse_reaction[name]["xml_ids"].append( xml_id )
+                else:
+                    drug_info_by_adverse_reaction[name] = item
+                    drug_info_by_adverse_reaction[name]["xml_ids"] = [ xml_id ]
+    
+
+    # get stats
+    num_total_labels = len( drug_labels )
+
+    for adverse_reaction in drug_info_by_adverse_reaction:
+        num_advr_labels = len( drug_info_by_adverse_reaction[adverse_reaction]["xml_ids"] )
+        percent = round(num_advr_labels * 100 / num_total_labels, 2)
+
+        drug_info_by_adverse_reaction[adverse_reaction]["percent"] = percent
+    
+
+    drug_info_by_adverse_reaction = list( drug_info_by_adverse_reaction.values() )
+
+    return {
+        "drug_info": drug_info_by_adverse_reaction,
+        "drug_name": drug_name,
+        "drug_labels": drug_labels
+    }
+
+        
+        
+
+    
+
+
+
+
+
+'''
 # returns drug name, list of unique drug labels, list of adverse reactions and drug labels associated with it
 @api.route("/api/drugs/<drugID>")
 def getDrugInfo(drugID):
@@ -112,7 +212,7 @@ def getDrugInfo(drugID):
         (drugID,)
     )
     drug_name_result = cursor.fetchall()
-
+    print(drug_name_result)
     # if no drug exists return
     if (len(drug_name_result) == 0):
         return {
@@ -155,7 +255,8 @@ def getDrugInfo(drugID):
             )
 
             label_result = cursor.fetchall()
-
+            print( label_result )
+            print("")
 
             # if > 1 it's a kit and do not include
             # if == 0 label not found
@@ -198,7 +299,7 @@ def getDrugInfo(drugID):
         "drug_name": drug_name,
         "drug_labels": drug_labels
     }
-
+'''
 
 # stats
 @api.route("/api/stats")
