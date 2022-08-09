@@ -119,9 +119,16 @@ def getDrugInfo(drugID):
 
     # get drug name and all of its xml_ids
     cursor.execute(
-        "SELECT ingredient_concept_name, xml_id FROM ingredients WHERE ingredient_concept_id = %s", 
+        """
+        SELECT ingredient_concept_name, ingredients.xml_id, zip_id, set_id 
+        FROM ingredients 
+        LEFT JOIN label_map ON ingredients.xml_id = label_map.xml_id 
+        WHERE ingredient_concept_id = %s 
+        ORDER BY zip_id DESC
+        """, 
         (drugID,)
     )
+
     drug_result = cursor.fetchall()
 
     # if no drug exists return
@@ -143,27 +150,43 @@ def getDrugInfo(drugID):
     for drug_product in drug_result:
 
         xml_id = drug_product["xml_id"]
+        set_id = drug_product["set_id"]
+        zip_id = drug_product["zip_id"]
 
         # get set id and such
         cursor.execute("""
-            SELECT rx_string, spl_version FROM rxnorm_map WHERE rx_tty = 'PSN' AND set_id IN (
-                SELECT set_id FROM label_map WHERE xml_id = %s
-            ) ORDER BY rx_string
-        """, (xml_id,))
+            SELECT rx_string, spl_version FROM rxnorm_map WHERE rx_tty = 'PSN' AND set_id = %s 
+            ORDER BY spl_version
+        """, (set_id,))
 
         label = cursor.fetchall()
 
         # if product is not part of kit
         if (len(label) == 1):
 
+            date = zip_id.split("_")[0]
+
+            try: 
+                date = date[:4] + "-" + date[4:6] + "-" + date[6:]
+            except:
+                date = date
+
+            label_string_arr = label[0]['rx_string'].split(' ')
+            label_string = ''
+
+            for item in label_string_arr:
+                word = item
+                if (word[0].islower()):
+                    word = word.lower().capitalize()
+                label_string += word + ' ' 
+
             drug_labels.append( {
                 'xml_id': xml_id,
-                'rx_string': label[0]['rx_string'],
+                'rx_string': label_string,
                 'spl_version': label[0]['spl_version'],
+                'date': date
             })
             
-
-
             cursor.execute(""" 
                 SELECT concept_name, concept_code FROM adverse_reactions_bylabel WHERE xml_id = %s
             """, (xml_id,))

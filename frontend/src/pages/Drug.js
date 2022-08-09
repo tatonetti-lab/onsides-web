@@ -23,6 +23,8 @@ export default function Drug() {
 
     const [drug, setDrug] = useState([])
 
+    const [currentLabels, setCurrentLabels] = useState([])
+
     const [drugName, setDrugName] = useState("");
     const [drugLabels, setDrugLabels] = useState([]);
 
@@ -40,19 +42,40 @@ export default function Drug() {
         getDrugInfo(params.id)
             .then(res => {
 
-                console.log(res)
+                //console.log(res)
 
                 setDrugName( res.drug_name );
 
-                console.log("set name");
+                //console.log("set name");
+                
+                /* 
+                let temp = []
 
-                setDrugLabels( res.drug_labels );
+                while (res.drug_labels.length > 0) {
+                    temp.push( res.drug_labels.splice(0, 100));
+                }
 
-                console.log("set labels");
+                setCurrentLabels( temp[0] )
+                */
 
-                setDrug(res.drug_info);
+                const temp = [];
+                for (let i = 0; i < res.drug_labels.length; i += 100) {
+                    const chunk = res.drug_labels.slice(i, i + 100);
+                    temp.push(chunk);
+                }
 
-                console.log("set info");
+                setCurrentLabels( temp[0] );
+                setDrugLabels( temp );
+
+                //console.log("set labels");
+
+                
+
+                setDrug( res.drug_info );
+
+                console.log( res.drug_info.length )
+
+                //console.log("set info");
 
                 setLoading(false);
 
@@ -61,21 +84,38 @@ export default function Drug() {
     }, [params.id])
 
     const addColumnHighlight = (event) => {
+        //var start = Date.now();
+
         let cols = document.getElementsByClassName(event.target.classList[0])
 
-        let index
-        for (index of cols) {
-            index.classList.add("highlight")
+        if (event.target.cellIndex) {
+            let selectedCol = document.querySelectorAll('td:nth-child(' + event.target.cellIndex + 1  + ')');
+            
+
+            let index
+            for (index of cols) {
+                index.classList.add("highlight")
+            }
+            //var delta = Date.now() - start;
+
+            //console.log("add ", delta);
         }
+
     }
 
     const removeColumnHighlight = (event) => {
+        //var start = Date.now();
+
         let cols = document.getElementsByClassName(event.target.classList[0])
 
         let index;
         for (index of cols) {
             index.classList.remove("highlight")
         }
+
+        //var delta = Date.now() - start;
+
+        //console.log("rem ", delta);
 
     }
 
@@ -122,7 +162,7 @@ export default function Drug() {
                         { loading ? 
                             <p> Loading ... </p> 
                             :
-                            drugLabels.length === 0 ? 
+                            currentLabels.length === 0 ? 
                                 <p> No labels found. </p>
                                 :
 
@@ -149,13 +189,13 @@ export default function Drug() {
                                             </OverlayTrigger>
 
                                         </h5> </th>
-                                        <th colSpan={drugLabels.length}> <h5>Labels</h5> </th>
+                                        <th colSpan={currentLabels.length}> <h5>Labels</h5> </th>
                                     </tr>
                                     <tr>
                                         <th className="fixed-col"> </th>
                                         <th className="second-col"> </th>
 
-                                        {drugLabels.map((item, index) => (
+                                        {currentLabels.map((item, index) => (
                                             <th key={index} className={item.xml_id}>
                                                 <OverlayTrigger
                                                     placement="bottom"
@@ -168,6 +208,8 @@ export default function Drug() {
 
                                                                 <br/> <br/>
 								                                SPL version: {item.spl_version}
+                                                                <br/>
+                                                                {item.date}
 
                                                             </span>
                                                         </Tooltip>}
@@ -191,7 +233,7 @@ export default function Drug() {
                                             </td>
                                             <td className="second-col"> {item.percent}% </td>
 
-                                            {drugLabels.map((label_item) => (
+                                            {currentLabels.map((label_item) => (
                                                 <td onMouseEnter={addColumnHighlight} onMouseLeave={removeColumnHighlight} className={label_item.xml_id} key={label_item.xml_id}> {item.xml_ids.includes(label_item.xml_id) ? <AiOutlineCheck /> : ""}</td>
                                             ))}
                                         </tr>
