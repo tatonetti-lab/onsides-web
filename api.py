@@ -15,7 +15,6 @@ def create_connection():
         user=creds["MYSQL_USER"],
         password=creds["MYSQL_PASSWORD"],
         db=creds["MYSQL_DB"],
-        port=int(creds["MYSQL_PORT"]),
         connect_timeout=100,
         cursorclass=MySQLdb.cursors.DictCursor,
     )
@@ -133,14 +132,14 @@ def getDrugInfo(drugID):
         }
 
     drug_name = drug_result[0]["ingredient_concept_name"]
-    print(drug_name)
-    print()
+    
+
 
     drug_info_by_adverse_reaction = {}
 
     drug_labels = []
 
-    print(len(drug_result))
+
     for drug_product in drug_result:
 
         xml_id = drug_product["xml_id"]
@@ -163,9 +162,7 @@ def getDrugInfo(drugID):
                 'spl_version': label[0]['spl_version'],
             })
             
-            #print(label[0]['rx_string'])
-            #print("xml_id: ", xml_id)
-            #print()
+
 
             cursor.execute(""" 
                 SELECT concept_name, concept_code FROM adverse_reactions_bylabel WHERE xml_id = %s
@@ -173,7 +170,6 @@ def getDrugInfo(drugID):
 
             adverse_reactions = cursor.fetchall()
 
-            print(len(adverse_reactions))
 
             for item in adverse_reactions:
 
@@ -229,7 +225,6 @@ def getStats():
     num_pairs = cursor.fetchall()
 
     con.close()
-    print(num_adverse_reactions, num_pairs, num_drugs)
 
     return {
         "drugs": num_drugs[0]["num"],

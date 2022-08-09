@@ -12,25 +12,7 @@ import json
 app = Flask(__name__, static_url_path='/public', 
 template_folder='./frontend/build', static_folder='./frontend/build/static')
 
-
 CORS(app)  # comment this on deployment
-
-
-
-app.config['MYSQL_HOST'] = 'localhost'
-#app.config['MYSQL_PORT'] = 3306
-app.config['MYSQL_USER'] = 'dm3786'
-app.config['MYSQL_PASSWORD'] = 'Jan3appleseed23!ß'
-app.config['MYSQL_DB'] = 'onsidesdb'
-
-'''
-app.config['MYSQL_HOST'] = os.environ.get("MYSQL_HOST")
-app.config['MYSQL_PORT'] = int(os.environ.get("MYSQL_PORT"))
-app.config['MYSQL_USER'] = os.environ.get("MYSQL_USER")
-app.config['MYSQL_PASSWORD'] = os.environ.get("MYSQL_PASSWORD")
-app.config['MYSQL_DB'] = os.environ.get("MYSQL_DB")
-'''
-
 
 from serve_pages import serve_pages
 from api import api
