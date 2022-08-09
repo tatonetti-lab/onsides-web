@@ -144,9 +144,8 @@ export default function Drug() {
                                                                 {item.rx_string}
 
                                                                 <br/> <br/>
+								SPL version: {item.spl_version}
 
-                                                                {item.spl_version}
-                                                                
                                                             </span>
                                                         </Tooltip>}
                                                 >

@@ -9,16 +9,16 @@ with open('sql.conf', 'r') as file:
         creds[key.strip()] = value.strip()
 
 
-#print(creds["MYSQL_HOST"], creds["MYSQL_USER"], creds["MYSQL_PASSWORD"], creds["MYSQL_DB"], int(creds["MYSQL_PORT"]));
-
-mysql = MySQLdb.connect(
-    host=creds["MYSQL_HOST"],
-    user=creds["MYSQL_USER"],
-    password=creds["MYSQL_PASSWORD"],
-    db=creds["MYSQL_DB"],
-   #port=int(creds["MYSQL_PORT"]),
-    connect_timeout=100,
-)
+def create_connection():
+    return MySQLdb.connect(
+        host=creds["MYSQL_HOST"],
+        user=creds["MYSQL_USER"],
+        password=creds["MYSQL_PASSWORD"],
+        db=creds["MYSQL_DB"],
+        port=int(creds["MYSQL_PORT"]),
+        connect_timeout=100,
+        cursorclass=MySQLdb.cursors.DictCursor,
+    )
 
 api = Blueprint('api', __name__,
                 template_folder='./frontend/build',
@@ -28,11 +28,14 @@ api = Blueprint('api', __name__,
 @api.route("/api/drugs")
 def get_all_drugs():
  
-    cursor = mysql.cursor(MySQLdb.cursors.DictCursor)
+    con = create_connection()
+    cursor = con.cursor()
     cursor.execute(
         "SELECT DISTINCT ingredient_concept_name, ingredient_concept_id FROM ingredients ORDER BY ingredient_concept_name")
 
     drugs = cursor.fetchall()
+
+    con.close()
 
     return {
         "drugs": drugs
@@ -41,12 +44,15 @@ def get_all_drugs():
 # returns list of all adverse reactions name and id sorted by name alphabetically
 @api.route("/api/adversereactions")
 def get_all_adverseReactions():
-  
-    cursor = mysql.cursor(MySQLdb.cursors.DictCursor)
+
+    con = create_connection() 
+    cursor = con.cursor()
     cursor.execute(
         "SELECT DISTINCT concept_name, meddra_id FROM adverse_reactions ORDER BY concept_name")
 
     adverse_reactions = cursor.fetchall()
+
+    con.close()
 
     return {
         "adverse_reactions": adverse_reactions
@@ -55,8 +61,9 @@ def get_all_adverseReactions():
 # returns lists of drugs and adverse reactions, both with name and id
 @api.route("/api/query/<keyword>")
 def query_keyword(keyword):
- 
-    cursor = mysql.cursor(MySQLdb.cursors.DictCursor)
+
+    con = create_connection()
+    cursor = con.cursor()
 
     cursor.execute("SELECT DISTINCT ingredient_concept_name, ingredient_concept_id FROM ingredients WHERE ingredient_concept_name LIKE %s ORDER BY ingredient_concept_name", ("%" + keyword + "%",))
 
@@ -67,6 +74,8 @@ def query_keyword(keyword):
 
     adverse_reactions = cursor.fetchall()
 
+    con.close()
+
     return {
         "drugs": drugs,
         "adverse_reactions": adverse_reactions
@@ -76,7 +85,8 @@ def query_keyword(keyword):
 @api.route("/api/adversereactions/<meddraID>")
 def getDrugsByAdverseReaction(meddraID):
 
-    cursor = mysql.cursor(MySQLdb.cursors.DictCursor)
+    con = create_connection()
+    cursor = con.cursor()
 
     # get adverse reaction name
     cursor.execute(
@@ -95,6 +105,8 @@ def getDrugsByAdverseReaction(meddraID):
 
     drugs = cursor.fetchall()
 
+    con.close()
+
     return {
         "drugs": drugs,
         "adverse_reaction": adverse_reaction
@@ -103,7 +115,8 @@ def getDrugsByAdverseReaction(meddraID):
 
 @api.route("/api/drugs/<drugID>")
 def getDrugInfo(drugID):
-    cursor = mysql.cursor(MySQLdb.cursors.DictCursor)
+    con = create_connection()
+    cursor = con.cursor()
 
     # get drug name and all of its xml_ids
     cursor.execute(
@@ -192,143 +205,36 @@ def getDrugInfo(drugID):
     }
 
         
-        
-
-    
-
-
-
-
-
-'''
-# returns drug name, list of unique drug labels, list of adverse reactions and drug labels associated with it
-@api.route("/api/drugs/<drugID>")
-def getDrugInfo(drugID):
-    cursor = mysql.cursor(MySQLdb.cursors.DictCursor)
-
-    # get drug name
-    cursor.execute(
-        "SELECT ingredient_concept_name FROM ingredients WHERE ingredient_concept_id = %s LIMIT 1", 
-        (drugID,)
-    )
-    drug_name_result = cursor.fetchall()
-    print(drug_name_result)
-    # if no drug exists return
-    if (len(drug_name_result) == 0):
-        return {
-            "drug_name": None,
-            "drug_info": None
-        }
-
-    drug_name = drug_name_result[0]["ingredient_concept_name"]
-
-    cursor.execute(
-        "SELECT xml_id, concept_name, meddra_id, ingredients, drug_concept_ids FROM adverse_reactions WHERE drug_concept_ids LIKE %s", 
-        ("%" + drugID + "%",)
-    )
-
-    drug_info_result = cursor.fetchall()
-
-    #print(drug_info_result)
-
-    drug_info = {}
-    labels_set = set()
-    kit_labels_set = set()
-    drug_labels = []
-
-
-    #iterate result to get drug product rx label and create dict of adverse reactions
-    for drug_product in drug_info_result:
-        
-        xml_id = drug_product["xml_id"]
-        
-        if (xml_id in kit_labels_set):
-            continue
-
-        if (xml_id not in labels_set):
-
-            cursor.execute("""
-                SELECT rx.rx_string
-                FROM label_map lm
-                JOIN rxnorm_map rx ON lm.set_id = rx.set_id and lm.xml_id = %s and rx.rx_tty = 'PSN'
-                """, (xml_id,)
-            )
-
-            label_result = cursor.fetchall()
-            print( label_result )
-            print("")
-
-            # if > 1 it's a kit and do not include
-            # if == 0 label not found
-            if (len(label_result) > 1):
-                kit_labels_set.add(xml_id)
-                continue
-            elif (len(label_result) == 0):
-                label_result = [{"rx_string": "Label N/A"}]
-
-            labels_set.add( xml_id )
-
-            drug_labels.append( {
-                "xml_id": xml_id,
-                "desc": label_result[0]["rx_string"]
-            })
-
-        adverse_reaction = drug_product["concept_name"]
-        ingredients = drug_product["ingredients"]
-
-        if (adverse_reaction in drug_info):
-            drug_info[adverse_reaction]["ingredients"].append( ingredients )
-            drug_info[adverse_reaction]["xml_id"].append( xml_id )
-
-        else:
-            drug_info[adverse_reaction] = drug_product
-            drug_info[adverse_reaction]["xml_id"] = [ xml_id ]
-            drug_info[adverse_reaction]["ingredients"] = [ ingredients ]
-
-
-    # get stats on how many labels of drug, adverse reaction relates to
-    for adverse_reaction in drug_info:
-        item_label_total = len(drug_info[adverse_reaction]["xml_id"])
-        drug_info[adverse_reaction]["percent"] = round(item_label_total * 100 / len(drug_labels), 2)
-
-
-    drug_info = list(drug_info.values())
-
-    return {
-        "drug_info": drug_info,
-        "drug_name": drug_name,
-        "drug_labels": drug_labels
-    }
-'''
-
 # stats
 @api.route("/api/stats")
 def getStats():
 
-    cursor = mysql.cursor()
+    con = create_connection()
+    cursor = con.cursor()
 
     # total drugs
     cursor.execute(
-        "SELECT COUNT( DISTINCT ingredient_concept_name ) FROM ingredients")
+        "SELECT COUNT( DISTINCT ingredient_concept_name ) as num FROM ingredients")
     num_drugs = cursor.fetchall()
 
 
     
     # total adv reactions
     cursor.execute(
-        "SELECT COUNT( DISTINCT concept_name ) FROM adverse_reactions")
+        "SELECT COUNT( DISTINCT concept_name ) as num FROM adverse_reactions")
     num_adverse_reactions = cursor.fetchall()
 
     # total drugs/adv reactions pairs
-    cursor.execute("SELECT COUNT( * ) FROM adverse_reactions")
+    cursor.execute("SELECT COUNT( * ) as num FROM adverse_reactions")
     num_pairs = cursor.fetchall()
 
+    con.close()
     print(num_adverse_reactions, num_pairs, num_drugs)
 
     return {
-        "drugs": num_drugs,
-        "adverse_reactions": num_adverse_reactions,
-        "pairs": num_pairs
+        "drugs": num_drugs[0]["num"],
+        "adverse_reactions": num_adverse_reactions[0]["num"],
+        "pairs": num_pairs[0]["num"],
     }
 
 
