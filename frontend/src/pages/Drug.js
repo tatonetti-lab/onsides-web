@@ -64,8 +64,8 @@ export default function Drug() {
                     temp.push(chunk);
                 }
 
-                setCurrentLabels( temp[0] );
-                setDrugLabels( temp );
+                setCurrentLabels( res.drug_labels );
+                setDrugLabels( res.drug_labels );
 
                 //console.log("set labels");
 
@@ -73,7 +73,7 @@ export default function Drug() {
 
                 setDrug( res.drug_info );
 
-                console.log( res.drug_info.length )
+                //console.log( res.drug_info.length )
 
                 //console.log("set info");
 
