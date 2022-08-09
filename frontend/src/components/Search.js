@@ -27,6 +27,8 @@ export default function Search() {
     const [reactionsResults, setReactionsResults] = useState([]);
     const [timer, setTimer] = useState(null);
 
+    const [loading, setLoading] = useState(false);
+
     // go to search results page
     const handleSubmit = (event) => {
         event.preventDefault();
@@ -40,27 +42,28 @@ export default function Search() {
 
     const handleChange = (event) => {
         let query = event.target.value.toLowerCase();
-	let prevQueryValue = queryValue;
-        console.log("handling query " + query);
 
-	setQueryValue( query );
+	    setQueryValue( query );
         
         if (query.length >= 3) {
 
-		clearTimeout(timer);
+            setLoading(true);
 
-		const newTimer = setTimeout(() => {
-		    console.log("api call");
+		    clearTimeout(timer);
+
+		    const newTimer = setTimeout(() => {
             	    queryKeyword(query)
             	        .then(res => {
 
                 	    setDrugsResults( res.drugs )       
                 	    setReactionsResults( res.adverse_reactions );
 
-            	        })
-		}, 500)
+                        setLoading(false);
 
-                setTimer(newTimer);
+            	        })
+		    }, 500)
+
+            setTimer(newTimer);
 
             popupResults.current.style.display = "block";
 
@@ -90,7 +93,7 @@ export default function Search() {
                 <Col xs={9}>
                 <div ref={popupResults} className="popup-search-results">
 
-                    <SearchResultsLists drugsResults={drugsResults.slice(0,11)} reactionsResults={reactionsResults.slice(0,11)} />
+                    <SearchResultsLists loading={loading} drugsResults={drugsResults.slice(0,11)} reactionsResults={reactionsResults.slice(0,11)} />
 
                     <a href="#" onClick={handleSubmit}> See all results </a>
                     

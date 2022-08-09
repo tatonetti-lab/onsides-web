@@ -31,7 +31,11 @@ export default function Drug() {
         direction: null
     })
 
+    const [loading, setLoading] = useState(false);
+
     useEffect(() => {
+
+        setLoading(true);
 
         getDrugInfo(params.id)
             .then(res => {
@@ -39,9 +43,18 @@ export default function Drug() {
                 console.log(res)
 
                 setDrugName( res.drug_name );
+
+                console.log("set name");
+
                 setDrugLabels( res.drug_labels );
 
+                console.log("set labels");
+
                 setDrug(res.drug_info);
+
+                console.log("set info");
+
+                setLoading(false);
 
             })
 
@@ -105,6 +118,16 @@ export default function Drug() {
                         <h1>{drugName}</h1>
                         <br />
 
+
+                        { loading ? 
+                            <p> Loading ... </p> 
+                            :
+                            drugLabels.length === 0 ? 
+                                <p> No labels found. </p>
+                                :
+
+                            
+
                         <div className="table-container">
                             <table ref={table} className="drug-info-table">
                                 <thead>
@@ -144,7 +167,7 @@ export default function Drug() {
                                                                 {item.rx_string}
 
                                                                 <br/> <br/>
-								SPL version: {item.spl_version}
+								                                SPL version: {item.spl_version}
 
                                                             </span>
                                                         </Tooltip>}
@@ -176,7 +199,7 @@ export default function Drug() {
                                 </tbody>
                             </table>
                         </div>
-
+                    }
                     </Container>
                 )
             }

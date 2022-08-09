@@ -19,7 +19,10 @@ export default function SearchResultsLists(props) {
                         ))}
                     </ul>
                     :
-                    <p> No results for drugs. </p>}
+                    props.loading === true ? 
+                        <p> Loading ... </p> :
+                        <p> No results for drugs. </p>
+                    }
             </div>
 
             <div className="results-reactions">
@@ -31,7 +34,9 @@ export default function SearchResultsLists(props) {
                         ))}
                     </ul>
                     :
-                    <p> No results for adverse reactions. </p>
+                    props.loading === true ? 
+                        <p> Loading ... </p> :
+                        <p> No results for adverse reactions. </p>
                 }
             </div>
             </div>

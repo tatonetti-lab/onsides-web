@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Container from "react-bootstrap/Container";
 import { useSearchParams } from 'react-router-dom'
 
@@ -14,17 +15,30 @@ export default function SearchResults() {
 
     const query = searchParams.get('q')
 
+    const navigate = useNavigate();
+
     const [drugsResults, setDrugsResults] = useState([]);
     const [reactionsResults, setReactionsResults] = useState([]);
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
 
-        if (query !== null) {
+        if (query !== null && query) {
+
+            setLoading(true);
+
             queryKeyword(query)
                 .then(res => {
                     setDrugsResults( res.drugs );
                     setReactionsResults( res.adverse_reactions );
+
+                    setLoading(false);
                 })
+        }
+        else {
+            navigate({
+                pathname: "/404",
+            });
         }
 
     },[])
@@ -40,7 +54,7 @@ export default function SearchResults() {
 
                 <div className="results">
                 
-                    <SearchResultsLists drugsResults={drugsResults} reactionsResults={reactionsResults}/>
+                    <SearchResultsLists loading={loading} drugsResults={drugsResults} reactionsResults={reactionsResults}/>
                 </div>
 
             </Container>
