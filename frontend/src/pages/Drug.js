@@ -23,7 +23,7 @@ export default function Drug() {
 
     const [drug, setDrug] = useState([])
 
-    const [currentLabels, setCurrentLabels] = useState([])
+    const [currentLabelsIndex, setCurrentLabelsIndex] = useState(0);
 
     const [drugName, setDrugName] = useState("");
     const [drugLabels, setDrugLabels] = useState([]);
@@ -64,8 +64,7 @@ export default function Drug() {
                     temp.push(chunk);
                 }
 
-                setCurrentLabels( res.drug_labels );
-                setDrugLabels( res.drug_labels );
+                setDrugLabels( temp );
 
                 //console.log("set labels");
 
@@ -86,16 +85,23 @@ export default function Drug() {
     const addColumnHighlight = (event) => {
         //var start = Date.now();
 
-        let cols = document.getElementsByClassName(event.target.classList[0])
-
+        //let cols = document.getElementsByClassName(event.target.classList[0])
+        //console.log(event.target.cellIndex + 1);
         if (event.target.cellIndex) {
-            let selectedCol = document.querySelectorAll('td:nth-child(' + event.target.cellIndex + 1  + ')');
+            let index = event.target.cellIndex + 1
+            let selectedCol = document.querySelectorAll('td:nth-child(' + index + ')');
             
-
+            selectedCol.forEach(el => {
+                el.style.backgroundColor = "#f2f2f2f2"
+            })
+            
+            /*
             let index
             for (index of cols) {
                 index.classList.add("highlight")
             }
+            */
+
             //var delta = Date.now() - start;
 
             //console.log("add ", delta);
@@ -106,12 +112,24 @@ export default function Drug() {
     const removeColumnHighlight = (event) => {
         //var start = Date.now();
 
-        let cols = document.getElementsByClassName(event.target.classList[0])
+        //let cols = document.getElementsByClassName(event.target.classList[0])
 
+        if (event.target.cellIndex) {
+            let index = event.target.cellIndex + 1
+            let selectedCol = document.querySelectorAll('td:nth-child(' + index + ')');
+            
+            selectedCol.forEach(el => {
+                el.style.backgroundColor = "#fff"
+            })
+            
+        }
+
+        /*
         let index;
         for (index of cols) {
             index.classList.remove("highlight")
         }
+        */
 
         //var delta = Date.now() - start;
 
@@ -162,13 +180,26 @@ export default function Drug() {
                         { loading ? 
                             <p> Loading ... </p> 
                             :
-                            currentLabels.length === 0 ? 
+                            drugLabels.length === 0 ? 
                                 <p> No labels found. </p>
                                 :
 
-                            
+                            (
+                                <>
 
+                                { drugLabels.length > 1 ?
+                                                <div className="paginate-labels">
+                                                View More Labels: 
+                                                
+                                                { drugLabels.map((item, index) => (
+                                                    <span onClick={ () => setCurrentLabelsIndex( index )} key={index} className={currentLabelsIndex === index ? "current-label-set" : ""}> {index+1} </span>
+                                                )
+                                                )}
+
+                                                </div>
+                                    : "" }
                         <div className="table-container">
+
                             <table ref={table} className="drug-info-table">
                                 <thead>
                                     <tr>
@@ -189,13 +220,15 @@ export default function Drug() {
                                             </OverlayTrigger>
 
                                         </h5> </th>
-                                        <th colSpan={currentLabels.length}> <h5>Labels</h5> </th>
+                                        <th colSpan={drugLabels[currentLabelsIndex].length} className="labels-header"> 
+                                            <h5>Labels</h5>                                             
+                                        </th>
                                     </tr>
                                     <tr>
                                         <th className="fixed-col"> </th>
                                         <th className="second-col"> </th>
 
-                                        {currentLabels.map((item, index) => (
+                                        {drugLabels[currentLabelsIndex].map((item, index) => (
                                             <th key={index} className={item.xml_id}>
                                                 <OverlayTrigger
                                                     placement="bottom"
@@ -233,7 +266,7 @@ export default function Drug() {
                                             </td>
                                             <td className="second-col"> {item.percent}% </td>
 
-                                            {currentLabels.map((label_item) => (
+                                            {drugLabels[currentLabelsIndex].map((label_item) => (
                                                 <td onMouseEnter={addColumnHighlight} onMouseLeave={removeColumnHighlight} className={label_item.xml_id} key={label_item.xml_id}> {item.xml_ids.includes(label_item.xml_id) ? <AiOutlineCheck /> : ""}</td>
                                             ))}
                                         </tr>
@@ -241,7 +274,8 @@ export default function Drug() {
                                 </tbody>
                             </table>
                         </div>
-                    }
+                        </>
+                    )}
                     </Container>
                 )
             }
