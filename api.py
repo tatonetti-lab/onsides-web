@@ -135,7 +135,8 @@ def getDrugInfo(drugID):
     if (len(drug_result) == 0):
         return {
             "drug_name": None,
-            "drug_info": None
+            "drug_info": None,
+            "drug_labels": [],
         }
 
     drug_name = drug_result[0]["ingredient_concept_name"]
@@ -176,8 +177,8 @@ def getDrugInfo(drugID):
 
             for item in label_string_arr:
                 word = item
-                if (word[0].islower()):
-                    word = word.lower().capitalize()
+                if (len(word) > 4 ):
+                    word = word.title()
                 label_string += word + ' ' 
 
             drug_labels.append( {

@@ -1,6 +1,8 @@
 import React, { useEffect } from "react";
 import { Link } from "react-router-dom";
 
+import Spinner from "./Spinner";
+
 import "./css/searchresultslists.css"
 
 export default function SearchResultsLists(props) {
@@ -19,8 +21,8 @@ export default function SearchResultsLists(props) {
                         ))}
                     </ul>
                     :
-                    props.loading === true ? 
-                        <p> Loading ... </p> :
+                    props.loading ? 
+                        <Spinner /> :
                         <p> No results for drugs. </p>
                     }
             </div>
@@ -34,8 +36,8 @@ export default function SearchResultsLists(props) {
                         ))}
                     </ul>
                     :
-                    props.loading === true ? 
-                        <p> Loading ... </p> :
+                    props.loading ? 
+                        <Spinner /> :
                         <p> No results for adverse reactions. </p>
                 }
             </div>

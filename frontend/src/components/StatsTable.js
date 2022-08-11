@@ -9,9 +9,9 @@ import { getStats } from "../api/onsides";
 export default function StatsTable() {
 
     const [stats, setStats] = useState({
-        adverseReactions: "0",
-        drugs: "0",
-        pairs: "0"
+        adverseReactions: ".",
+        drugs: " ",
+        pairs: " "
     });
 
     useEffect(() => {
