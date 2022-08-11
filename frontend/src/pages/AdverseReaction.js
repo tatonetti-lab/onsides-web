@@ -10,7 +10,9 @@ import PageDoesNotExist from "./PageDoesNotExist";
 
 import { getDrugsByAdverseReaction } from "../api/onsides";
 
-import "./css/adversereaction.css"
+import "./css/adversereaction.css";
+
+import Spinner from "../components/Spinner";
 
 export default function AdverseReaction() {
 
@@ -20,7 +22,11 @@ export default function AdverseReaction() {
     const [adverseReaction, setAdverseReaction] = useState("")
     const [desc, setDesc] = useState();
 
+    const [loading, setLoading] = useState(false);
+
     useEffect(() => {
+
+        setLoading(true);
 
         getDrugsByAdverseReaction(params.id)
             .then(res => {
@@ -29,6 +35,8 @@ export default function AdverseReaction() {
                 let term_name = res.adverse_reaction[0].concept_name;
 
                 setAdverseReaction(term_name);
+
+                setLoading(false);
 
                 getDefiniton(term_name)
                     .then(res => {
@@ -48,8 +56,14 @@ export default function AdverseReaction() {
 
                     <Container>
 
+                        { loading ? 
+                            <Spinner /> : 
+                            (<>
+
                         <div className="home-title">
                             <h2> {adverseReaction} </h2>
+
+                            
                             <p> {desc === undefined ? "" : 
                             <span>
                                 {desc} 
@@ -97,6 +111,7 @@ export default function AdverseReaction() {
                         ))}
                         </ul>
 
+                    </>)}
                     </Container>
 
                 )

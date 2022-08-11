@@ -15,6 +15,7 @@ import { getDrugInfo } from "../api/onsides";
 
 import PageDoesNotExist from "./PageDoesNotExist";
 
+import Spinner from "../components/Spinner";
 
 export default function Drug() {
 
@@ -178,7 +179,7 @@ export default function Drug() {
 
 
                         { loading ? 
-                            <p> Loading ... </p> 
+                            <Spinner /> 
                             :
                             drugLabels.length === 0 ? 
                                 <p> No labels found. </p>

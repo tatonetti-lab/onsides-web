@@ -6,14 +6,20 @@ import PaginatedItems from "../components/Pagination";
 
 import { getAllAdverseReactions } from "../api/onsides";
 
+import Spinner from "../components/Spinner";
+
 export default function AdverseReactionsList() {
 
-    const [adverseReactions, setadverseReactions] = useState([])
+    const [adverseReactions, setadverseReactions] = useState([]);
+
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
+        setLoading(true);
         getAllAdverseReactions()
             .then(res => {
                 setadverseReactions(res.adverse_reactions);
+                setLoading(false);
             })
     }, [])
 
@@ -40,9 +46,15 @@ export default function AdverseReactionsList() {
 
                 <br />
 
+                { loading ?
+                    
+                <Spinner />
+                
+                : 
+
                 <PaginatedItems itemsPerPage={100} ItemsComponent={Items} items={adverseReactions} />
 
-
+                }
 
 
             </Container>

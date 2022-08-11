@@ -61,7 +61,7 @@ export default function Search() {
                         setLoading(false);
 
             	        })
-		    }, 500)
+		    }, 400)
 
             setTimer(newTimer);
 

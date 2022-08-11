@@ -6,14 +6,22 @@ import PaginatedItems from "../components/Pagination";
 
 import { getAllDrugs } from "../api/onsides";
 
+import Spinner from "../components/Spinner";
+
 export default function DrugsList() {
 
-    const [drugs, setDrugs] = useState([])
+    const [drugs, setDrugs] = useState([]);
+
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
+
+        setLoading(true);
+
         getAllDrugs()
             .then(res => {
                 setDrugs(res.drugs);
+                setLoading(false);
             })
     }, [])
 
@@ -41,8 +49,13 @@ export default function DrugsList() {
 
                 <br />
 
-                <PaginatedItems itemsPerPage={100} ItemsComponent={Items} items={drugs} />
+                { loading ? 
 
+                    <Spinner/> 
+                    : 
+                    <PaginatedItems itemsPerPage={100} ItemsComponent={Items} items={drugs} />
+
+                }
 
             </Container>
         </div>
