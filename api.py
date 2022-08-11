@@ -2,7 +2,7 @@ from flask import Blueprint, request, jsonify, send_file
 import MySQLdb
 
 creds = {}
-with open('sql.conf', 'r') as file:
+with open('/var/www/onsides.tatonettilab.org/sql.conf', 'r') as file:
     content = file.readlines()
     for line in content:
         key, value = line.split("=")
