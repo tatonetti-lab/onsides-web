@@ -17,7 +17,7 @@ export default function SearchResultsLists(props) {
                 {props.drugsResults.length !== 0 ?
                     <ul>
                         {props.drugsResults.map((item) => (
-                           <li key={item.ingredient_concept_id}> <Link to={"/drugs/"+item.ingredient_concept_id}>{item.ingredient_concept_name}</Link> </li>
+                           <li key={item.id}> <Link to={"/drugs/"+item.id}>{item.name}</Link> </li>
                         ))}
                     </ul>
                     :
@@ -32,7 +32,7 @@ export default function SearchResultsLists(props) {
                 {props.reactionsResults.length !== 0 ?
                     <ul>
                         {props.reactionsResults.map((item) => (
-                            <li key={item.meddra_id}> <Link to={"/adverse/"+item.meddra_id}>{item.concept_name}</Link> </li>
+                            <li key={item.id}> <Link to={"/adverse/"+item.id}>{item.name}</Link> </li>
                         ))}
                     </ul>
                     :

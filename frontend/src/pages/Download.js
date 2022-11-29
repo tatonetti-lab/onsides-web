@@ -13,10 +13,9 @@ export default function Download() {
                 <br />
                 <br />
 
-                <p>The data are available as a set of SQL tables or as flat files in CSV format.</p>
+                <p>The latest data are available as flat files in CSV format. For previous releases check out <a href="https://github.com/tatonetti-lab/onsides/releases" target="_blank">our github page</a>.</p>
 
-                <p><b>SQL file</b>: <br/> <a href="https://github.com/tatonetti-lab/onsides/releases/download/v01/onsides_v01_20220430.sql.gz" target="_blank">onsides_v01_20220430.sql.gz</a> (81MB, md5:b386e9485e943120c9a783edf843d68e) </p>
-                <p><b>CSV files</b>: <br/> <a href="https://github.com/tatonetti-lab/onsides/releases/download/v01/onsides_v01_20220430.tar.gz" target="_blank">onsides_v01_20220430.tar.gz</a> (81MB, md5:f73ded83cf5edc63447f6ca8b80add66)</p>
+                <p><b>CSV files</b>: <br/> <a href="https://github.com/tatonetti-lab/onsides/releases/download/v2.0.0-20221112/onsides_v2.0.0_20221112.tar.gz" target="_blank">onsides_v2.0.0_20221110.tar.gz</a> (105MB (md5: d33e49a315f7fa2e6ab7459f11de8e97))</p>
 
                 <br />
 

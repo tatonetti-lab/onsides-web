@@ -29,7 +29,7 @@ export default function AdverseReactionsList() {
             <ul className="pagination-items">
                 {currentItems &&
                     currentItems.map((item) => (
-                        <li key={item.meddra_id}> <Link to={"/adverse/"+item.meddra_id}>{item.concept_name}</Link></li>
+                        <li key={item.id}> <Link to={"/adverse/"+item.id}>{item.term}</Link></li>
                     ))}
                     </ul>
             </>

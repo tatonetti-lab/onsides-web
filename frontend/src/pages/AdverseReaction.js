@@ -5,6 +5,7 @@ import { getDefiniton } from "../api/bioontology";
 import OverlayTrigger from 'react-bootstrap/OverlayTrigger'
 import Tooltip from 'react-bootstrap/Tooltip'
 
+import PaginatedItems from "../components/Pagination";
 
 import PageDoesNotExist from "./PageDoesNotExist";
 
@@ -32,19 +33,36 @@ export default function AdverseReaction() {
             .then(res => {
                 setDrugs(res.drugs);
 
-                let term_name = res.adverse_reaction[0].concept_name;
+                let term_name = res.adverse_reaction[0].name;
+
+                getDefiniton(term_name)
+                    .then(res => {
+                        setDesc(res)
+                    })   
 
                 setAdverseReaction(term_name);
 
                 setLoading(false);
 
-                getDefiniton(term_name)
-                    .then(res => {
-                        setDesc(res)
-                    })            
+                         
             });
 
     }, [params.id])
+
+
+    function Items({ currentItems }) {
+        return (
+            <>
+                <ul className="pagination-items">
+                {currentItems &&
+                    currentItems.map((item) => (
+                        <li key={item.id}> <Link to={"/drugs/" + item.id}>{item.name}</Link></li>
+                    ))}
+                </ul>
+            </>
+        );
+    }
+
 
     return (
         <div className="body">
@@ -91,25 +109,19 @@ export default function AdverseReaction() {
 
                         <h5>Drugs associated with adverse reaction:</h5>
 
+                        {drugs.length > 100 ?
+                        <PaginatedItems itemsPerPage={100} ItemsComponent={Items} items={drugs} />
+                        :
                         <ul className="adverse-reaction-list">
                         {drugs.map((item) => (
-                            <li key={item.drug_concept_ids}>
-                                {item.ingredients.split(",").length === 1 ?
-                                    <Link to={"/drugs/" + item.drug_concept_ids}>{item.ingredients}</Link>
-                                    :
-                                    item.ingredients.split(",").map((ind_drug, index) => (
-                                        <>
-                                            <Link key={index} to={"/drugs/" + item.drug_concept_ids.split(", ")[index]}>{ind_drug.trim()}</Link>
-
-                                            {index !== item.ingredients.split(",").length - 1 ? ", " : ""}
-                                        </>
-
-                                    ))
-
-                                }
+                            <li key={item.id}>
+                                
+                                    <Link to={"/drugs/" + item.id}>{item.name}</Link>
+                                
                             </li>
                         ))}
                         </ul>
+                        }
 
                     </>)}
                     </Container>

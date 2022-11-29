@@ -31,7 +31,7 @@ export default function DrugsList() {
                 <ul className="pagination-items">
                 {currentItems &&
                     currentItems.map((item) => (
-                        <li key={item.ingredient_concept_id}> <Link to={"/drugs/" + item.ingredient_concept_id}>{item.ingredient_concept_name}</Link></li>
+                        <li key={item.id}> <Link to={"/drugs/" + item.id}>{item.name}</Link></li>
                     ))}
                 </ul>
             </>

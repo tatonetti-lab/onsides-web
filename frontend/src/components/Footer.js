@@ -15,10 +15,10 @@ export default function Footer() {
             <Container>
                 <Row className="justify-content-between">
                     <Col> 
-                        <a href="https://tatonettilab.org/" target="_blank">© 2022 Tatonetti Lab @ Columbia University</a>
+                        <a href="https://tatonettilab.org/" target="_blank">© 2022 Tatonetti Lab</a>
                     </Col>
                     <Col style={{ textAlign: "right" }}>
-                        Follow us  <a href="https://twitter.com/nicktatonetti" target="_blank"><AiOutlineTwitter /> @nicktatonetti</a> and  <a href="https://github.com/tatonetti-lab" target="_blank"><AiFillGithub /> @tatonetti-lab</a>
+                        Follow us  <a href="https://twitter.com/nicktatonetti" target="_blank"><AiOutlineTwitter /> @nicktatonetti</a> and  <a href="https://github.com/tatonetti-lab/onsides" target="_blank"><AiFillGithub /> @tatonetti-lab</a>
                     </Col>
                 </Row>
             </Container>

@@ -43,8 +43,6 @@ export default function Drug() {
         getDrugInfo(params.id)
             .then(res => {
 
-                //console.log(res)
-
                 setDrugName( res.drug_name );
 
                 //console.log("set name");
@@ -67,15 +65,7 @@ export default function Drug() {
 
                 setDrugLabels( temp );
 
-                //console.log("set labels");
-
-                
-
                 setDrug( res.drug_info );
-
-                //console.log( res.drug_info.length )
-
-                //console.log("set info");
 
                 setLoading(false);
 
@@ -204,7 +194,7 @@ export default function Drug() {
                             <table ref={table} className="drug-info-table">
                                 <thead>
                                     <tr>
-                                        <th onClick={() => handleSort("concept_name")} className="sorted-col fixed-col"> <h5>Adverse Effects <AiOutlineSortAscending /></h5> </th>
+                                        <th onClick={() => handleSort("term")} className="sorted-col fixed-col"> <h5>Adverse Effects <AiOutlineSortAscending /></h5> </th>
                                         <th onClick={() => handleSort("percent")} className="sorted-col second-col"> <h5> Stats <BsSortNumericDown />
 
                                             <OverlayTrigger
@@ -238,7 +228,7 @@ export default function Drug() {
                                                         <Tooltip>
                                                             <span>
 
-                                                                {item.rx_string}
+                                                                {item.rxstring}
 
                                                                 <br/> <br/>
 								                                SPL version: {item.spl_version}
@@ -248,7 +238,7 @@ export default function Drug() {
                                                             </span>
                                                         </Tooltip>}
                                                 >
-                                                    <Button size="md" variant="dark">{index + 1}</Button>
+                                                    <Button size="md" variant="dark">{(index + 1) + ((100)*currentLabelsIndex)}</Button>
                                                 </OverlayTrigger>
                                             </th>
                                         ))}
@@ -257,10 +247,21 @@ export default function Drug() {
                                 </thead>
                                 <tbody>
                                     {drug.map((item) => (
-                                        <tr key={item.concept_code}>
+                                        <tr key={item.id}>
                                             <td className="fixed-col">
                                                 
-                                                    <span><Link to={"/adverse/"+item.concept_code}>{item.concept_name}</Link></span>
+                                                    <span><Link to={"/adverse/"+item.id}>{item.term}</Link>{item.boxed ? <OverlayTrigger
+                                                placement="bottom"
+                                                delay={{ show: 50, hide: 300 }}
+                                                overlay={
+                                                    <Tooltip>
+                                                        <span>
+                                                            Boxed Warning
+                                                        </span>
+                                                    </Tooltip>}
+                                            >
+                                                <span>*</span>
+                                            </OverlayTrigger> : ""}</span>
                                                 
 
 
@@ -268,7 +269,7 @@ export default function Drug() {
                                             <td className="second-col"> {item.percent}% </td>
 
                                             {drugLabels[currentLabelsIndex].map((label_item) => (
-                                                <td onMouseEnter={addColumnHighlight} onMouseLeave={removeColumnHighlight} className={label_item.xml_id} key={label_item.xml_id}> {item.xml_ids.includes(label_item.xml_id) ? <AiOutlineCheck /> : ""}</td>
+                                                <td onMouseEnter={addColumnHighlight} onMouseLeave={removeColumnHighlight} className={label_item.set_id} key={label_item.set_id}> {item.set_ids.includes(label_item.setid) ? <AiOutlineCheck /> : ""}</td>
                                             ))}
                                         </tr>
                                     ))}
