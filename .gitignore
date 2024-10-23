@@ -30,3 +30,5 @@ sql_script/
 
 logs/access.logs
 logs/app.logs
+
+.venv/
