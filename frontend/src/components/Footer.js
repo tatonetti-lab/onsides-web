@@ -16,17 +16,17 @@ export default function Footer() {
               target="_blank"
               rel="noreferrer"
             >
-              © 2024 Tatonetti Lab @ Columbia University
+              © 2024 Tatonetti Lab @ Cedars-Sinai Medical Center
             </a>
           </Col>
           <Col style={{ textAlign: "right" }}>
             Follow us{" "}
             <a
-              href="https://twitter.com/nicktatonetti"
+              href="https://twitter.com/proftatonetti"
               target="_blank"
               rel="noreferrer"
             >
-              <AiOutlineTwitter /> @nicktatonetti
+              <AiOutlineTwitter /> @proftatonetti
             </a>{" "}
             and{" "}
             <a
@@ -42,4 +42,3 @@ export default function Footer() {
     </div>
   );
 }
-
