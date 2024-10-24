@@ -1,36 +1,38 @@
 import axios from "axios";
 
-// axios.defaults.baseURL = "https://onsides.tatonettilab.org/api";
-axios.defaults.baseURL = "http://localhost:5000/api";
+axios.defaults.baseURL = "https://onsidesdb.org/api";
 
-export const getAllDrugs = () => {
-  return axios
-    .get("/drugs")
-    .catch((err) => console.log(err))
-    .then((res) => {
-      return res.data;
-    });
+export const getAllDrugs = async () => {
+  let res;
+  try {
+    res = await axios.get("/drugs");
+  } catch (err) {
+    res = console.log(err);
+  }
+  return res.data;
 };
 
-export const getAllAdverseReactions = () => {
-  return axios
-    .get("/adversereactions")
-    .catch((err) => console.log(err))
-    .then((res) => {
-      return res.data;
-    });
+export const getAllAdverseReactions = async () => {
+  let res;
+  try {
+    res = await axios.get("/adversereactions");
+  } catch (err) {
+    res = console.log(err);
+  }
+  return res.data;
 };
 
-export const queryKeyword = (keyword) => {
-  return axios
-    .get("/query/" + keyword)
-    .catch((err) => console.log(err))
-    .then((res) => {
-      return res.data;
-    });
+export const queryKeyword = async (keyword) => {
+  let res;
+  try {
+    res = await axios.get("/query/" + keyword);
+  } catch (err) {
+    res = console.log(err);
+  }
+  return res.data;
 };
 
-export const getDrugsByAdverseReaction = (meddraID) => {
+export const getDrugsByAdverseReaction = async (meddraID) => {
   return axios
     .get("/adversereactions/" + meddraID)
     .catch((err) => console.log(err))
@@ -39,7 +41,7 @@ export const getDrugsByAdverseReaction = (meddraID) => {
     });
 };
 
-export const getDrugInfo = (drugID) => {
+export const getDrugInfo = async (drugID) => {
   return axios
     .get("/drugs/" + drugID)
     .catch((err) => console.log(err))
@@ -48,7 +50,7 @@ export const getDrugInfo = (drugID) => {
     });
 };
 
-export const getStats = () => {
+export const getStats = async () => {
   return axios
     .get("/stats")
     .catch((err) => console.log(err))
