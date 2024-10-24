@@ -24,7 +24,7 @@ def get_all_drugs():
         """
         SELECT concept_name AS ingredient_concept_name,
                concept_id AS ingredient_concept_id
-        FROM ingredientspublic
+        FROM ingredientpublic
         """
     )
     drugs = cursor.fetchall()
@@ -39,7 +39,7 @@ def get_all_adverseReactions():
     cursor = con.cursor()
     cursor.execute(
         """
-        SELECT meddra_term AS concept_name, meddra_id
+        SELECT meddra_name AS concept_name, meddra_id
         FROM adversereactionspublic
         """
     )
