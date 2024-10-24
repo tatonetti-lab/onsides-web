@@ -1,0 +1,157 @@
+- name: Build backend locally
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  vars:
+    frontend_path: "{{ playbook_dir }}/frontend"
+  tasks:
+    - name: Install frontend dependencies
+      args:
+        chdir: "{{ frontend_path }}"
+      shell: |
+        bun install --frozen-lockfile
+    - name: Build frontend
+      args:
+        chdir: "{{ frontend_path }}"
+      shell: |
+        bun run build
+
+- name: Deploy onsides website to Hetzner server
+  hosts: hetzner
+  become: yes
+  vars:
+    frontend_path: "{{ playbook_dir }}/frontend"
+    app_name: onsidesdb
+    app_user: "{{ app_name }}"
+    app_path: "/opt/{{ app_name }}"
+    backend_path: "{{ app_path }}/backend"
+    venv_path: "{{ backend_path }}/.venv"
+    frontend_build_path: "{{ app_path }}/frontend/build"
+    static_path: "{{ frontend_build_path }}/static"
+    domain_name: onsidesdb.org
+    nginx_conf_path: "/etc/nginx/conf.d/{{ app_name }}.conf"
+    nginx_basic_conf_file: "nginx-basic.conf"
+    nginx_conf_file: "nginx.conf"
+    email_address: "michael.zietz@gmail.com"
+  tasks:
+    - name: Install required system packages
+      apt:
+        name:
+          - nginx
+          - sqlite3
+        state: present
+        update_cache: yes
+
+    - name: Create application user
+      user:
+        name: "{{ app_user }}"
+        system: yes
+        create_home: no
+        shell: /usr/sbin/nologin
+
+    - name: Create application directories
+      file:
+        path: "{{ item }}"
+        state: directory
+        owner: "{{ app_user }}"
+        group: "{{ app_user }}"
+        mode: '0755'
+      with_items:
+        - "{{ app_path }}"
+        - "{{ backend_path }}"
+        - "{{ static_path }}"
+
+    - name: Copy .py files from the backend directory
+      synchronize:
+        src: "{{ playbook_dir }}/backend/"
+        dest: "{{ backend_path }}/"
+        rsync_opts:
+          - "--delete"
+          - "--compress"
+          - "--exclude=etl.py"
+          - "--exclude=.venv"
+          - "--exclude=__pycache__"
+
+    - name: Install UV
+      shell: |
+        curl -LsSf https://astral.sh/uv/install.sh | sh
+      args:
+        creates:
+          - /root/.cargo/bin/uv
+          - /root/.cargo/bin/uvx
+      register: uv_install
+
+    - name: Create and sync Python virtual environment
+      args:
+        chdir: "{{ backend_path }}"
+      shell: |
+        /root/.cargo/bin/uv sync --locked
+
+    - name: Create systemd service file
+      template:
+        src: flask-app.service.j2
+        dest: /etc/systemd/system/{{ app_name }}.service
+        mode: '0644'
+
+    - name: Remove default Nginx configuration
+      file:
+        path: "{{ item }}"
+        state: absent
+      with_items:
+        - /etc/nginx/sites-enabled/default
+        - /etc/nginx/sites-available/default
+      notify: reload nginx
+
+    - name: Create Nginx configuration
+      template:
+        src: nginx.conf.j2
+        dest: "{{ nginx_conf_path }}"
+        mode: '0644'
+      notify: reload nginx
+
+    - name: Rsync frontend files
+      synchronize:
+        src: "{{ frontend_path }}/build/"
+        dest: "{{ frontend_build_path }}/"
+        rsync_opts:
+          - "--delete"
+          - "--compress"
+          - "--recursive"
+
+    - name: Rsync the database
+      synchronize:
+        src: "{{ playbook_dir }}/database.db"
+        dest: "{{ app_path }}/database.db"
+        rsync_opts:
+          - "--compress"
+
+    - name: Ensure nginx is started and enabled
+      systemd:
+        name: nginx
+        state: started
+        enabled: yes
+
+    - name: Ensure the directory gives proper permissions for the app user
+      file:
+        path: "{{ app_path }}"
+        owner: "{{ app_user }}"
+        group: "{{ app_user }}"
+        recurse: yes
+
+    - name: Start and enable Flask application service
+      systemd:
+        name: "{{ app_name }}"
+        state: started
+        enabled: yes
+        daemon_reload: yes
+
+    - name: Obtain SSL certificate
+      command: /root/.cargo/bin/uvx --with certbot-nginx certbot --nginx -d {{ domain_name }} --non-interactive --agree-tos --email {{ email_address }} --redirect
+      args:
+        creates: "/etc/letsencrypt/live/{{ domain_name }}"
+
+  handlers:
+    - name: reload nginx
+      systemd:
+        name: nginx
+        state: reloaded

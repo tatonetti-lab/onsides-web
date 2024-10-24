@@ -1,0 +1,14 @@
+[Unit]
+Description={{ app_name }} Flask Application
+After=network.target
+
+[Service]
+User={{ app_user }}
+Group={{ app_user }}
+WorkingDirectory={{ backend_path }}
+Environment="ONSIDESDB={{ app_path }}/database.db"
+ExecStart={{ venv_path }}/bin/gunicorn --bind 127.0.0.1:5000 app:app
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
