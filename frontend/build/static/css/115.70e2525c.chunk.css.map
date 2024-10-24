@@ -1,1 +1,0 @@
-{"version":3,"file":"static/css/115.70e2525c.chunk.css","mappings":"AAAA,YACI,4BACJ,CCFA,aACI,UACJ,CAEA,gBACI,SACJ","sources":["pages/css/home.css","components/css/statstable.css"],"sourcesContent":[".home-title {\n    border-bottom: 1px solid #999;\n}",".stats-table {\n    width: 100%;\n}\n\n.stats-table td {\n    width: 33%;\n}"],"names":[],"sourceRoot":""}

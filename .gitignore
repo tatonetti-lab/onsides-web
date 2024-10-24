@@ -35,3 +35,4 @@ logs/app.logs
 __pycache__
 data
 database.db
+frontend/build
