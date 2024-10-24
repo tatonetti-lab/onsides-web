@@ -1,40 +1,58 @@
-import axios from "axios"
+import axios from "axios";
 
-axios.defaults.baseURL = 'https://onsides.tatonettilab.org/api';
+// axios.defaults.baseURL = "https://onsides.tatonettilab.org/api";
+axios.defaults.baseURL = "http://localhost:5000/api";
 
 export const getAllDrugs = () => {
-    return axios.get("/drugs")
-        .catch(err => console.log(err))
-        .then(res => { return res.data })
-}
+  return axios
+    .get("/drugs")
+    .catch((err) => console.log(err))
+    .then((res) => {
+      return res.data;
+    });
+};
 
 export const getAllAdverseReactions = () => {
-    return axios.get("/adversereactions")
-        .catch(err => console.log(err))
-        .then(res => {return res.data})
-}
+  return axios
+    .get("/adversereactions")
+    .catch((err) => console.log(err))
+    .then((res) => {
+      return res.data;
+    });
+};
 
 export const queryKeyword = (keyword) => {
-    return axios.get("/query/"+keyword)
-        .catch(err => console.log(err))
-        .then(res => {return res.data})
-}
+  return axios
+    .get("/query/" + keyword)
+    .catch((err) => console.log(err))
+    .then((res) => {
+      return res.data;
+    });
+};
 
 export const getDrugsByAdverseReaction = (meddraID) => {
-    return axios.get("/adversereactions/"+meddraID)
-        .catch(err => console.log(err))
-        .then(res => {return res.data})
-}
+  return axios
+    .get("/adversereactions/" + meddraID)
+    .catch((err) => console.log(err))
+    .then((res) => {
+      return res.data;
+    });
+};
 
 export const getDrugInfo = (drugID) => {
-    return axios.get("/drugs/"+drugID)
-        .catch(err => console.log(err))
-        .then(res => {return res.data})
-}
-
+  return axios
+    .get("/drugs/" + drugID)
+    .catch((err) => console.log(err))
+    .then((res) => {
+      return res.data;
+    });
+};
 
 export const getStats = () => {
-    return axios.get("/stats")
-    .catch(err => console.log(err))
-    .then(res => {return res.data})
-}
+  return axios
+    .get("/stats")
+    .catch((err) => console.log(err))
+    .then((res) => {
+      return res.data;
+    });
+};
