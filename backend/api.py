@@ -1,9 +1,9 @@
-import datetime
 import os
-import re
 import sqlite3
 
 from flask import Blueprint
+from flask_pydantic import validate
+from pydantic import BaseModel
 
 
 def create_connection():
@@ -136,115 +136,128 @@ def getDrugsByAdverseReaction(meddraID):
     return {"drugs": drugs, "adverse_reaction": adverse_reaction}
 
 
-@api.route("/api/drugs/<drugID>")
-def getDrugInfo(drugID):
-    con = create_connection()
-    cursor = con.cursor()
+class DrugInfoItem(BaseModel):
+    concept_name: str
+    concept_code: int
+    rx_cuis: list[int]
+    percent: float
+
+
+class DrugLabelItem(BaseModel):
+    rx_cui: int
+    spl_version: int
+    dates: list[str]
+    rx_strings: str
+
+    def __hash__(self):
+        return (self.rx_cui, self.rx_strings, self.spl_version, self.dates)
+
+
+class DrugInfoResponse(BaseModel):
+    drug_name: str | None
+    drug_info: list[DrugInfoItem] | None
+    drug_labels: list[DrugLabelItem]
+
+
+def get_drug_name(ingredient_rx_cui: int, cursor: sqlite3.Cursor) -> str | None:
     cursor.execute(
         """
-        SELECT DISTINCT ingredient_name, set_id, zip_file_name
-        FROM ingredients
-        LEFT JOIN dmsplzipfilesmetadata USING (set_id)
-        WHERE ingredient_rx_cui = ?
-        ORDER BY zip_file_name DESC
+        SELECT concept_name
+        FROM ingredientpublic
+        WHERE rx_cui = ?
         """,
-        (drugID,),
+        (ingredient_rx_cui,),
     )
-    drug_result = cursor.fetchall()
-    drug_result = [
-        {
-            "ingredient_concept_name": result[0],
-            "set_id": result[1],
-            "zip_id": result[2],
-        }
-        for result in drug_result
+    drug_names = cursor.fetchone()
+    return None if len(drug_names) == 0 else drug_names[0]
+
+
+def get_distinct_products(
+    ingredient_rx_cui: int, cursor: sqlite3.Cursor
+) -> list[DrugLabelItem]:
+    cursor.execute(
+        """
+        SELECT DISTINCT rx_cui, spl_version,
+            GROUP_CONCAT(DISTINCT upload_date) as upload_dates,
+            GROUP_CONCAT(DISTINCT rx_string) AS rx_strings
+        FROM ingredients
+        INNER JOIN dmsplzipfilesmetadata USING (set_id)
+        INNER JOIN rxnormmappings USING (set_id, spl_version)
+        WHERE ingredient_rx_cui = ?
+        GROUP BY rx_cui, spl_version
+        """,
+        (ingredient_rx_cui,),
+    )
+    items = cursor.fetchall()
+    return [
+        DrugLabelItem(
+            rx_cui=row[0],
+            spl_version=row[1],
+            dates=row[2].split(","),
+            rx_strings=row[3],
+        )
+        for row in items
     ]
-    # if no drug exists return
-    if len(drug_result) == 0:
-        return {
-            "drug_name": None,
-            "drug_info": None,
-            "drug_labels": [],
-        }
 
-    drug_name = drug_result[0]["ingredient_concept_name"]
-    drug_info_by_adverse_reaction = {}
-    drug_labels = []
-    for drug_product in drug_result:
-        set_id = drug_product["set_id"]
-        zip_id = drug_product["zip_id"]
 
-        date_match = re.match("^[0-9]{8}(?=_)", zip_id)
-        if date_match:
-            date = date_match.group()
-            date = datetime.datetime.strptime(date, "%Y%m%d")
-            date = date.strftime("%Y-%m-%d")
-        else:
-            date = zip_id.split("_")[0]
-
-        cursor.execute(
-            """
-            SELECT rx_string, spl_version
-            FROM rxnormmappings
-            WHERE rx_tty = 'PSN' AND set_id = ?
-            ORDER BY spl_version
-            """,
-            (set_id,),
+def get_adverse_reaction_stats(
+    ingredient_rx_cui: int, cursor: sqlite3.Cursor
+) -> list[DrugInfoItem]:
+    cursor.execute(
+        """
+        WITH total_sets AS (
+            SELECT ingredient_rx_cui, COUNT(DISTINCT rx_cui) AS n_total_product_cuis
+            FROM ingredients
+            INNER JOIN rxnormmappings USING (set_id)
+            WHERE ingredient_rx_cui = ?
+        ),
+             sets_per_adverse AS (
+            SELECT ingredient_rx_cui, pt_meddra_id, pt_meddra_term,
+                GROUP_CONCAT(DISTINCT rx_cui) AS product_rxcuis,
+                COUNT(DISTINCT rx_cui)        AS n_product_rxcuis_with_adverse
+            FROM ingredients
+            INNER JOIN adversereactionsactivelabels USING (set_id)
+            INNER JOIN (
+                SELECT * FROM rxnormmappings WHERE rx_tty = 'PSN'
+            ) AS psns USING (set_id, spl_version)
+            WHERE ingredient_rx_cui = ?
+            GROUP BY pt_meddra_id, pt_meddra_term
         )
-        labels = cursor.fetchall()
-        labels = [
-            {
-                "rx_string": x[0],
-                "spl_version": x[1],
-                "date": date,
-                "set_id": set_id,
-            }
-            for x in labels
-        ]
-        drug_labels.extend(labels)
-
-        cursor.execute(
-            """
-            SELECT pt_meddra_term, pt_meddra_id
-            FROM adversereactionsalllabels
-            WHERE set_id = ?
-            """,
-            (set_id,),
+        SELECT pt_meddra_id, pt_meddra_term, product_rxcuis,
+            ROUND(
+                100 * CAST(
+                    n_product_rxcuis_with_adverse AS REAL
+                ) / n_total_product_cuis, 2
+            ) AS percent
+        FROM total_sets
+        INNER JOIN sets_per_adverse USING (ingredient_rx_cui)
+        """,
+        (ingredient_rx_cui, ingredient_rx_cui),
+    )
+    items = cursor.fetchall()
+    return [
+        DrugInfoItem(
+            concept_code=row[0],
+            concept_name=row[1],
+            rx_cuis=row[2].split(","),
+            percent=row[3],
         )
-        adverse_reactions = cursor.fetchall()
-        adverse_reactions = [
-            {
-                "concept_name": x[0],
-                "concept_code": x[1],
-            }
-            for x in adverse_reactions
-        ]
-        for item in adverse_reactions:
-            name = item["concept_name"]
-            if name in drug_info_by_adverse_reaction:
-                drug_info_by_adverse_reaction[name]["set_ids"].add(set_id)
-            else:
-                drug_info_by_adverse_reaction[name] = item
-                drug_info_by_adverse_reaction[name]["set_ids"] = {set_id}
+        for row in items
+    ]
 
-    # get stats
-    num_total_labels = len({x["set_id"] for x in drug_labels})
-    for adverse_reaction in drug_info_by_adverse_reaction:
-        num_advr_labels = len(
-            drug_info_by_adverse_reaction[adverse_reaction]["set_ids"]
-        )
-        percent = round(num_advr_labels * 100 / num_total_labels, 2)
-        drug_info_by_adverse_reaction[adverse_reaction]["percent"] = percent
-        drug_info_by_adverse_reaction[adverse_reaction]["set_ids"] = sorted(
-            drug_info_by_adverse_reaction[adverse_reaction]["set_ids"]
-        )
 
-    drug_info = list(drug_info_by_adverse_reaction.values())
-    return {
-        "drug_info": drug_info,
-        "drug_name": drug_name,
-        "drug_labels": drug_labels,
-    }
+@api.route("/api/drugs/<drugID>")
+@validate()
+def getDrugInfo(drugID) -> DrugInfoResponse:
+    con = create_connection()
+    cursor = con.cursor()
+    drug_name = get_drug_name(drugID, cursor)
+    drug_products = get_distinct_products(drugID, cursor)
+    adverse_reaction_stats = get_adverse_reaction_stats(drugID, cursor)
+    con.close()
+    return DrugInfoResponse(
+        drug_name=drug_name, drug_info=adverse_reaction_stats, drug_labels=drug_products
+    )
 
 
 # stats

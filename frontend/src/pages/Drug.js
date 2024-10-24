@@ -177,18 +177,18 @@ export default function Drug() {
                       <th className="second-col"> </th>
 
                       {drugLabels[currentLabelsIndex].map((item, index) => (
-                        <th key={index} className={item.set_id}>
+                        <th key={index} className={item.rx_cui}>
                           <OverlayTrigger
                             placement="bottom"
                             delay={{ show: 250, hide: 400 }}
                             overlay={
                               <Tooltip>
                                 <span>
-                                  {item.rx_string}
+                                  {item.rx_strings}
                                   <br /> <br />
                                   SPL version: {item.spl_version}
                                   <br />
-                                  {item.date}
+                                  {item.dates}
                                 </span>
                               </Tooltip>
                             }
@@ -218,11 +218,11 @@ export default function Drug() {
                             <td
                               onMouseEnter={addColumnHighlight}
                               onMouseLeave={removeColumnHighlight}
-                              className={label_item.set_id}
+                              className={label_item.rx_cui}
                               key={index}
                             >
                               {" "}
-                              {item.set_ids.includes(label_item.set_id) ? (
+                              {item.rx_cuis.includes(label_item.rx_cui) ? (
                                 <AiOutlineCheck />
                               ) : (
                                 ""
