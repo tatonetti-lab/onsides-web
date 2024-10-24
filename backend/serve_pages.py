@@ -9,10 +9,10 @@ from flask import (
 serve_pages = Blueprint(
     "serve_pages",
     __name__,
-    template_folder="frontend/build",
-    static_folder="frontend/build/static",
+    template_folder="../frontend/build",
+    static_folder="../frontend/build/static",
 )
-list_of_build_files = set(os.listdir("frontend/build"))
+list_of_build_files = set(os.listdir("../frontend/build"))
 
 
 @serve_pages.route("/", defaults={"path": ""})
@@ -20,5 +20,5 @@ list_of_build_files = set(os.listdir("frontend/build"))
 def catch_all(path):
     # print(path)
     if path in list_of_build_files:
-        return send_from_directory("frontend/build", path)
+        return send_from_directory("../frontend/build", path)
     return render_template("index.html")

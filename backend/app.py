@@ -7,8 +7,8 @@ from serve_pages import serve_pages
 app = Flask(
     __name__,
     static_url_path="/public",
-    template_folder="./frontend/build",
-    static_folder="./frontend/build/static",
+    template_folder="../frontend/build",
+    static_folder="../frontend/build/static",
 )
 
 CORS(app, resources=["/api/*"], origins=["*"])  # comment this on deployment
