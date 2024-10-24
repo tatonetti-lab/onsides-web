@@ -11,7 +11,7 @@ app = Flask(
     static_folder="./frontend/build/static",
 )
 
-CORS(app)  # comment this on deployment
+CORS(app, resources=["/api/*"], origins=["*"])  # comment this on deployment
 
 
 app.register_blueprint(api)
