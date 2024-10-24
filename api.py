@@ -1,3 +1,5 @@
+import datetime
+import re
 import sqlite3
 
 from flask import Blueprint
@@ -22,12 +24,15 @@ def get_all_drugs():
     cursor = con.cursor()
     cursor.execute(
         """
-        SELECT concept_name AS ingredient_concept_name,
-               concept_id AS ingredient_concept_id
+        SELECT concept_name, rx_cui
         FROM ingredientpublic
         """
     )
     drugs = cursor.fetchall()
+    drugs = [
+        {"ingredient_concept_name": drug[0], "ingredient_concept_id": drug[1]}
+        for drug in drugs
+    ]
     con.close()
     return {"drugs": drugs}
 
@@ -44,6 +49,9 @@ def get_all_adverseReactions():
         """
     )
     adverse_reactions = cursor.fetchall()
+    adverse_reactions = [
+        {"concept_name": a[0], "meddra_id": a[1]} for a in adverse_reactions
+    ]
     con.close()
     return {"adverse_reactions": adverse_reactions}
 
@@ -55,23 +63,30 @@ def query_keyword(keyword):
     cursor = con.cursor()
     cursor.execute(
         """
-        SELECT concept_name AS ingredient_concept_name,
-               concept_id AS ingredient_concept_id
-        FROM ingredientspublic
-        WHERE concept_name LIKE %s
+        SELECT concept_name, rx_cui
+        FROM ingredientpublic
+        WHERE concept_name LIKE ?
         """,
-        ("%" + keyword + "%",),
+        (f"%{keyword}%",),
     )
     drugs = cursor.fetchall()
+    drugs = [
+        {"ingredient_concept_name": drug[0], "ingredient_concept_id": drug[1]}
+        for drug in drugs
+    ]
     cursor.execute(
         """
         SELECT meddra_name AS concept_name, meddra_id
         FROM adversereactionspublic
-        WHERE meddra_name LIKE %s
+        WHERE meddra_name LIKE ?
         """,
-        ("%" + keyword + "%",),
+        (f"%{keyword}%",),
     )
     adverse_reactions = cursor.fetchall()
+    adverse_reactions = [
+        {"concept_name": adverse[0], "meddra_id": adverse[1]}
+        for adverse in adverse_reactions
+    ]
     con.close()
     return {"drugs": drugs, "adverse_reactions": adverse_reactions}
 
@@ -84,28 +99,34 @@ def getDrugsByAdverseReaction(meddraID):
     # get adverse reaction name
     cursor.execute(
         """
-        SELECT concept_name, meddra_id
-        FROM adverse_reactions
-        WHERE meddra_id =  %s
+        SELECT pt_meddra_term, pt_meddra_id
+        FROM adversereactions
+        WHERE pt_meddra_id = ?
         LIMIT 1
         """,
         (meddraID,),
     )
-    adverse_reaction = cursor.fetchall()
-    # if no adverse reaction found return
-    if len(adverse_reaction) == 0:
+    adverse_reactions = cursor.fetchall()
+    if len(adverse_reactions) == 0:
         return {"adverse_reaction": [{"concept_name": None}]}
+
+    adverse_reaction = adverse_reactions[0]
+    adverse_reaction = {
+        "concept_name": adverse_reaction[0],
+        "meddra_id": adverse_reaction[1],
+    }
 
     cursor.execute(
         """
-        SELECT ingredients, drug_concept_ids
-        FROM adverse_reactions
-        WHERE meddra_id = %s
-        ORDER BY ingredients
+        SELECT ingredients_names, ingredients_rxcuis
+        FROM adversereactions
+        WHERE pt_meddra_id = ?
+        ORDER BY ingredients_names
         """,
         (meddraID,),
     )
     drugs = cursor.fetchall()
+    drugs = [{"ingredients": drug[0], "drug_concept_ids": drug[1]} for drug in drugs]
     con.close()
     return {"drugs": drugs, "adverse_reaction": adverse_reaction}
 
@@ -114,19 +135,25 @@ def getDrugsByAdverseReaction(meddraID):
 def getDrugInfo(drugID):
     con = create_connection()
     cursor = con.cursor()
-    # get drug name and all of its xml_ids
     cursor.execute(
         """
-        SELECT ingredient_concept_name, ingredients.xml_id, zip_id, set_id
+        SELECT DISTINCT ingredient_name, set_id, zip_file_name
         FROM ingredients
-        LEFT JOIN label_map ON ingredients.xml_id = label_map.xml_id
-        WHERE ingredient_concept_id = %s
-        ORDER BY zip_id DESC
+        LEFT JOIN dmsplzipfilesmetadata USING (set_id)
+        WHERE ingredient_rx_cui = ?
+        ORDER BY zip_file_name DESC
         """,
         (drugID,),
     )
-
     drug_result = cursor.fetchall()
+    drug_result = [
+        {
+            "ingredient_concept_name": result[0],
+            "set_id": result[1],
+            "zip_id": result[2],
+        }
+        for result in drug_result
+    ]
     # if no drug exists return
     if len(drug_result) == 0:
         return {
@@ -134,87 +161,82 @@ def getDrugInfo(drugID):
             "drug_info": None,
             "drug_labels": [],
         }
+
     drug_name = drug_result[0]["ingredient_concept_name"]
     drug_info_by_adverse_reaction = {}
     drug_labels = []
     for drug_product in drug_result:
-        xml_id = drug_product["xml_id"]
         set_id = drug_product["set_id"]
         zip_id = drug_product["zip_id"]
 
-        # get set id and such
+        date_match = re.match("^[0-9]{8}(?=_)", zip_id)
+        if date_match:
+            date = date_match.group()
+            date = datetime.datetime.strptime(date, "%Y%m%d")
+            date = date.strftime("%Y-%m-%d")
+        else:
+            date = zip_id.split("_")[0]
+
         cursor.execute(
             """
             SELECT rx_string, spl_version
-            FROM rxnorm_map
-            WHERE rx_tty = 'PSN' AND set_id = %s
+            FROM rxnormmappings
+            WHERE rx_tty = 'PSN' AND set_id = ?
             ORDER BY spl_version
             """,
             (set_id,),
         )
-        label = cursor.fetchall()
-        # if product is not part of kit
-        if len(label) == 1:
-            date = zip_id.split("_")[0]
+        labels = cursor.fetchall()
+        labels = [
+            {
+                "rx_string": x[0],
+                "spl_version": x[1],
+                "date": date,
+                "set_id": set_id,
+            }
+            for x in labels
+        ]
+        drug_labels.extend(labels)
 
-            try:
-                date = date[:4] + "-" + date[4:6] + "-" + date[6:]
-            except:
-                date = date
-
-            label_string_arr = label[0]["rx_string"].split(" ")
-            label_string = ""
-
-            for item in label_string_arr:
-                word = item
-                if len(word) > 4:
-                    word = word.title()
-                label_string += word + " "
-
-            drug_labels.append(
-                {
-                    "xml_id": xml_id,
-                    "rx_string": label_string,
-                    "spl_version": label[0]["spl_version"],
-                    "date": date,
-                }
-            )
-
-            cursor.execute(
-                """
-                SELECT concept_name, concept_code
-                FROM adverse_reactions_bylabel
-                WHERE xml_id = %s
-                """,
-                (xml_id,),
-            )
-
-            adverse_reactions = cursor.fetchall()
-
-            for item in adverse_reactions:
-                name = item["concept_name"]
-
-                if name in drug_info_by_adverse_reaction:
-                    drug_info_by_adverse_reaction[name]["xml_ids"].append(xml_id)
-                else:
-                    drug_info_by_adverse_reaction[name] = item
-                    drug_info_by_adverse_reaction[name]["xml_ids"] = [xml_id]
+        cursor.execute(
+            """
+            SELECT pt_meddra_term, pt_meddra_id
+            FROM adversereactionsalllabels
+            WHERE set_id = ?
+            """,
+            (set_id,),
+        )
+        adverse_reactions = cursor.fetchall()
+        adverse_reactions = [
+            {
+                "concept_name": x[0],
+                "concept_code": x[1],
+            }
+            for x in adverse_reactions
+        ]
+        for item in adverse_reactions:
+            name = item["concept_name"]
+            if name in drug_info_by_adverse_reaction:
+                drug_info_by_adverse_reaction[name]["set_ids"].add(set_id)
+            else:
+                drug_info_by_adverse_reaction[name] = item
+                drug_info_by_adverse_reaction[name]["set_ids"] = {set_id}
 
     # get stats
-    num_total_labels = len(drug_labels)
-
+    num_total_labels = len({x["set_id"] for x in drug_labels})
     for adverse_reaction in drug_info_by_adverse_reaction:
         num_advr_labels = len(
-            drug_info_by_adverse_reaction[adverse_reaction]["xml_ids"]
+            drug_info_by_adverse_reaction[adverse_reaction]["set_ids"]
         )
         percent = round(num_advr_labels * 100 / num_total_labels, 2)
-
         drug_info_by_adverse_reaction[adverse_reaction]["percent"] = percent
+        drug_info_by_adverse_reaction[adverse_reaction]["set_ids"] = sorted(
+            drug_info_by_adverse_reaction[adverse_reaction]["set_ids"]
+        )
 
-    drug_info_by_adverse_reaction = list(drug_info_by_adverse_reaction.values())
-
+    drug_info = list(drug_info_by_adverse_reaction.values())
     return {
-        "drug_info": drug_info_by_adverse_reaction,
+        "drug_info": drug_info,
         "drug_name": drug_name,
         "drug_labels": drug_labels,
     }
@@ -227,23 +249,21 @@ def getStats():
     cursor = con.cursor()
 
     # total drugs
-    cursor.execute(
-        "SELECT COUNT( DISTINCT ingredient_concept_name ) as num FROM ingredients"
-    )
+    cursor.execute("SELECT COUNT( DISTINCT concept_id ) as num FROM ingredientpublic")
     num_drugs = cursor.fetchall()
 
     # total adv reactions
     cursor.execute(
-        "SELECT COUNT( DISTINCT concept_name ) as num FROM adverse_reactions"
+        "SELECT COUNT( DISTINCT meddra_id ) as num FROM adversereactionspublic"
     )
     num_adverse_reactions = cursor.fetchall()
 
     # total drugs/adv reactions pairs
-    cursor.execute("SELECT COUNT( * ) as num FROM adverse_reactions")
+    cursor.execute("SELECT COUNT( * ) as num FROM adversereactions")
     num_pairs = cursor.fetchall()
     con.close()
     return {
-        "drugs": num_drugs[0]["num"],
-        "adverse_reactions": num_adverse_reactions[0]["num"],
-        "pairs": num_pairs[0]["num"],
+        "drugs": num_drugs[0][0],
+        "adverse_reactions": num_adverse_reactions[0][0],
+        "pairs": num_pairs[0][0],
     }
