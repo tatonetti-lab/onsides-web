@@ -32,3 +32,6 @@ logs/access.logs
 logs/app.logs
 
 .venv/
+__pycache__
+data
+database.db
