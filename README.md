@@ -69,7 +69,7 @@ all:
     hetzner:
       ansible_host: 5.78.130.180
       ansible_user: root
-      ansible_ssh_private_key_file: /Users/zietzm/.ssh/webgwas_id_ed25519
+      ansible_ssh_private_key_file: /Users/yourname/.ssh/id_ed25519
 ```
 
 Change the last line to the path to your ssh private key.
