@@ -254,7 +254,8 @@ def drop_all_stems(path: pathlib.Path) -> str | None:
 
 def cleanup_df(df: pd.DataFrame) -> pd.DataFrame:
     return (
-        df.fillna({"ingredients_rxcuis": "", "ingredients_names": ""})
+        df.drop_duplicates()
+        .fillna({"ingredients_rxcuis": "", "ingredients_names": ""})
         .rename(columns=lambda x: x.lower())
         .rename(
             columns={
