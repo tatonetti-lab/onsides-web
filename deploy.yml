@@ -128,7 +128,7 @@
     - name: Ensure nginx is started and enabled
       systemd:
         name: nginx
-        state: started
+        state: restarted
         enabled: yes
 
     - name: Ensure the directory gives proper permissions for the app user
@@ -141,7 +141,7 @@
     - name: Start and enable Flask application service
       systemd:
         name: "{{ app_name }}"
-        state: started
+        state: restarted
         enabled: yes
         daemon_reload: yes
 
