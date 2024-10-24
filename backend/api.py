@@ -1,4 +1,5 @@
 import datetime
+import os
 import re
 import sqlite3
 
@@ -6,7 +7,11 @@ from flask import Blueprint
 
 
 def create_connection():
-    return sqlite3.connect("database.db")
+    path = os.getenv("ONSIDESDB")
+    if path is None:
+        raise ValueError("Environmental variable ONSIDESDB must be set")
+
+    return sqlite3.connect(path)
 
 
 api = Blueprint(
