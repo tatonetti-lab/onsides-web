@@ -47,8 +47,8 @@ class AdverseReactionsAllLabels(SQLModel, table=True):
     section: str
     zip_id: str
     label_id: str
-    set_id: str
-    spl_version: int
+    set_id: str = Field(index=True)
+    spl_version: int = Field(index=True)
     pt_meddra_id: int
     pt_meddra_term: str
     pred0: float
@@ -128,7 +128,7 @@ class WarningsAndPrecautionsAllLabels(SQLModel, table=True):
 class Ingredients(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
     set_id: str
-    ingredient_rx_cui: int
+    ingredient_rx_cui: int = Field(index=True)
     ingredient_name: str
     ingredient_omop_concept_id: int
 
@@ -151,17 +151,17 @@ class RxNormProductToIngredient(SQLModel, table=True):
 
 class RxNormMappings(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
-    set_id: str
+    set_id: str = Field(index=True)
     spl_version: int
     rx_cui: int
     rx_string: str
-    rx_tty: str
+    rx_tty: str = Field(index=True)
 
 
 class DmSplZipFilesMetaData(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
-    set_id: str
-    zip_file_name: str
+    set_id: str = Field(index=True)
+    zip_file_name: str = Field(index=True)
     upload_date: datetime.date
     spl_version: int
     title: str
