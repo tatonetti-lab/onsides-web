@@ -1,5 +1,4 @@
 from flask import Flask
-from flask_cors import CORS  # comment this on deployment (?)
 
 from api import api
 from serve_pages import serve_pages
@@ -10,8 +9,6 @@ app = Flask(
     template_folder="../frontend/build",
     static_folder="../frontend/build/static",
 )
-
-CORS(app, resources=["/api/*"], origins=["*"])  # comment this on deployment (?)
 
 
 app.register_blueprint(api)
