@@ -1,7 +1,6 @@
 import React from "react";
 import { Route, Routes } from "react-router-dom";
 import "./app.css";
-import "./components/css/pagination.css";
 import HeaderAndFooter from "./components/HeaderAndFooter";
 import Drug from "./pages/Drug";
 import AdverseReaction from "./pages/AdverseReaction";
