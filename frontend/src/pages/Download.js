@@ -13,42 +13,36 @@ export default function Download() {
         <br />
 
         <p>
-          The data are available as a set of SQL tables or as flat files in CSV
-          format.
+          This analysis is updated regularly. The latest data are available for
+          download in our{" "}
+          <a href="https://github.com/tatonetti-lab/onsides/releases">
+            GitHub releases
+          </a>
+          . For more information about the flat files, see the{" "}
+          <a href="https://github.com/tatonetti-lab/onsides?tab=readme-ov-file#table-descriptions">
+            table descriptions
+          </a>
+          .
         </p>
 
-        <p>
-          <b>SQL file</b>: <br />{" "}
+        <div className="my-4">
           <a
-            href="https://github.com/tatonetti-lab/onsides/releases/download/v01/onsides_v01_20220430.sql.gz"
+            href="https://github.com/tatonetti-lab/onsides/releases/latest"
             target="_blank"
             rel="noreferrer"
+            className="bg-neutral-950 hover:bg-neutral-600 text-white hover:!text-neutral-100 py-2 px-4 rounded-full text-lg no-underline"
           >
-            onsides_v01_20220430.sql.gz
-          </a>{" "}
-          (81MB, md5:b386e9485e943120c9a783edf843d68e){" "}
-        </p>
-        <p>
-          <b>CSV files</b>: <br />{" "}
-          <a
-            href="https://github.com/tatonetti-lab/onsides/releases/download/v01/onsides_v01_20220430.tar.gz"
-            target="_blank"
-            rel="noreferrer"
-          >
-            onsides_v01_20220430.tar.gz
-          </a>{" "}
-          (81MB, md5:f73ded83cf5edc63447f6ca8b80add66)
-        </p>
-
-        <br />
+            Download Latest Release
+          </a>
+        </div>
 
         <h5>Note</h5>
         <p>
           The Onsides database is intended for research purposes only. The
-          extraction process is far from perfect, side effects will be missed
-          and some identified will be incorrect. Patients seeking health
-          information should not trust these data and instead refer to the FDA's
-          website (fda.gov) and consult their doctor.
+          extraction process is imperfect, side effects will be missed and some
+          identified will be incorrect. Patients seeking health information
+          should not trust these data and instead refer to the FDA's website
+          (fda.gov) and consult their doctor.
         </p>
         <p>
           The project is under active development. Validation of extracted
@@ -56,10 +50,11 @@ export default function Download() {
           and statistics are subject to change at any time. Check back to this
           page for updates. If you would like to to contribute to the project or
           have ideas on how the methods, data, or evaluation can be improved
-          please reach out to Dr. Tatonetti via email or Twitter.
+          please reach out to Prof. Tatonetti via{" "}
+          <a href="mailto:nicholas.tatonetti@cshs.org">email</a> or{" "}
+          <a href="https://twitter.com/proftatonetti">Twitter</a>.
         </p>
       </Container>
     </div>
   );
 }
-
