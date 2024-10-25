@@ -16,6 +16,9 @@ export default function Header() {
               <Nav.Link href="/drugs">Drugs</Nav.Link>
               <Nav.Link href="/adverse">Adverse Reactions</Nav.Link>
               <Nav.Link href="/download">Download</Nav.Link>
+              <Nav.Link href="https://github.com/tatonetti-lab/onsides">
+                Source code
+              </Nav.Link>
             </Nav>
           </Navbar.Collapse>
         </Container>
@@ -23,4 +26,3 @@ export default function Header() {
     </div>
   );
 }
-
