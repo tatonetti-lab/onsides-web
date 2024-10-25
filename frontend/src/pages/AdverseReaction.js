@@ -65,11 +65,7 @@ export default function AdverseReaction() {
                         }
                       >
                         <span>
-                          <a
-                            href="https://bioportal.bioontology.org/ontologies/NCIT"
-                            target="_blank"
-                            rel="noreferrer"
-                          >
+                          <a href="https://bioportal.bioontology.org/ontologies/NCIT">
                             *
                           </a>
                         </span>

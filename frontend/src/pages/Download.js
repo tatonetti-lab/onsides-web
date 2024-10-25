@@ -28,8 +28,6 @@ export default function Download() {
         <div className="my-4">
           <a
             href="https://github.com/tatonetti-lab/onsides/releases/latest"
-            target="_blank"
-            rel="noreferrer"
             className="bg-neutral-950 hover:bg-neutral-600 text-white hover:!text-neutral-100 py-2 px-4 rounded-full text-lg no-underline"
           >
             Download Latest Release
