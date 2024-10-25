@@ -71,7 +71,7 @@ export default function Search() {
           />
         </Col>
         <Col>
-          <Button type="submit" variant="dark">
+          <Button type="submit" variant="dark" size="lg">
             <BiSearchAlt2 />
           </Button>
         </Col>
