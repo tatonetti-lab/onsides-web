@@ -5,3 +5,7 @@ a {
 a:hover {
     color: #555 !important;
 }
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
