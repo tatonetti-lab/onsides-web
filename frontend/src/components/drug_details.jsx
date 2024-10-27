@@ -119,7 +119,7 @@ export default function DrugDetailsPage({ rxcui }) {
     const getPageNumbers = (current, total) => {
         if (total <= 7) return Array.from({ length: total }, (_, i) => i);
 
-        if (current <= 3) return [0, 1, 2, 3, 4, null, total - 1];
+        if (current <= 3) return [0, 1, null, total - 2, total - 1];
         if (current >= total - 4) return [0, null, total - 5, total - 4, total - 3, total - 2, total - 1];
 
         return [0, null, current - 1, current, current + 1, null, total - 1];
@@ -175,7 +175,7 @@ export default function DrugDetailsPage({ rxcui }) {
     return (
         <div className="container mx-auto py-8">
             <h1 className="text-4xl font-bold mb-8">{drugName}</h1>
-            <div className="w-full flex justify-start gap-2 mb-8">
+            <div className="w-full flex flex-wrap justify-start gap-2 mb-8">
                 {categoryOptions.map((option) => (
                     <Button
                         key={option.value}
@@ -208,7 +208,7 @@ export default function DrugDetailsPage({ rxcui }) {
                                                 <ArrowUpDown className="h-4 w-4" />
                                             </Button>
                                         </TableHead>
-                                        <TableHead className="w-1/6 border-r border-b">
+                                        <TableHead className="w-1/12 border-r border-b">
                                             <TooltipProvider>
                                                 <Tooltip>
                                                     <TooltipTrigger asChild>
@@ -238,7 +238,7 @@ export default function DrugDetailsPage({ rxcui }) {
 
                                     <TableRow className="sticky top-0">
                                         <TableHead className="w-1/3 border-r border-b" />
-                                        <TableHead className="w-1/6 border-r border-b" />
+                                        <TableHead className="w-1/12 border-r border-b" />
                                         <TableHead className="p-0 border-b" colSpan={drugLabels[currentLabelsIndex]?.length}>
                                             <div className="flex px-0 items-center">
                                                 {drugLabels[currentLabelsIndex]?.map((item, index) => (

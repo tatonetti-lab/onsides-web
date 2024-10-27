@@ -109,6 +109,7 @@ class DrugInfoItem(BaseModel):
 class DrugLabelItem(BaseModel):
     rx_cui: int
     spl_version: int
+    set_id: str
     dates: list[str]
     rx_strings: str
 
