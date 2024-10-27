@@ -46,6 +46,14 @@ server {
     add_header X-Content-Type-Options nosniff;
     add_header X-XSS-Protection "1; mode=block";
 
+    # Enable gzip compression
+    gzip on;
+    gzip_types application/json;
+    gzip_vary on;
+    gzip_proxied any;
+    gzip_comp_level 6;
+    gzip_min_length 256;
+
     # API locations
     location /api/ {
         proxy_pass http://127.0.0.1:5000;
