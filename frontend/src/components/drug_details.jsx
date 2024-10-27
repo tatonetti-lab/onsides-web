@@ -247,18 +247,28 @@ export default function DrugDetailsPage({ rxcui }) {
                                                             <TooltipProvider>
                                                                 <Tooltip>
                                                                     <TooltipTrigger asChild>
-                                                                        <Button
-                                                                            variant="outline"
-                                                                            size="sm"
-                                                                            className="h-6 w-6 p-0 bg-primary text-primary-foreground"
+                                                                        <a
+                                                                            href={`https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=${item.set_id}`}
+                                                                            target="_blank" rel="noopener noreferrer"
                                                                         >
-                                                                            {index + 1}
-                                                                        </Button>
+                                                                            <Button
+                                                                                variant="outline"
+                                                                                size="sm"
+                                                                                className="h-7 w-7 p-0 bg-primary text-primary-foreground"
+                                                                            >
+                                                                                {item.id}
+                                                                            </Button>
+                                                                        </a>
                                                                     </TooltipTrigger>
                                                                     <TooltipContent>
-                                                                        <div className="space-y-2">
+                                                                        <div className="space-y-1">
                                                                             <p>{item.rx_strings}</p>
+                                                                            <p>Set ID: {item.set_id}</p>
                                                                             <p>SPL version: {item.spl_version}</p>
+                                                                            <p><a
+                                                                                href={`https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=${item.set_id}`}
+                                                                                target="_blank" rel="noopener noreferrer"
+                                                                            >DailyMed link</a></p>
                                                                         </div>
                                                                     </TooltipContent>
                                                                 </Tooltip>
@@ -302,7 +312,7 @@ export default function DrugDetailsPage({ rxcui }) {
                     {drugLabels.length > 1 && (
                         <div className="my-6">
                             <Pagination>
-                                <PaginationContent className="gap-1">
+                                <PaginationContent className="gap-0">
                                     <PaginationItem>
                                         <Button
                                             variant="ghost"
@@ -313,7 +323,7 @@ export default function DrugDetailsPage({ rxcui }) {
                                         </Button>
                                     </PaginationItem>
                                     {pageNumbers.map((pageNum, idx) => (
-                                        <PaginationItem key={idx} className="min-w-[2.25rem] flex justify-center">
+                                        <PaginationItem key={idx} className="flex justify-center">
                                             {pageNum === null ? (
                                                 <span className="px-2">⋯</span>
                                             ) : (
@@ -342,7 +352,8 @@ export default function DrugDetailsPage({ rxcui }) {
                         </div>
                     )}
                 </>
-            )}
-        </div>
+            )
+            }
+        </div >
     );
 }

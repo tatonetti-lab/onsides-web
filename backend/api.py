@@ -107,6 +107,7 @@ class DrugInfoItem(BaseModel):
 
 
 class DrugLabelItem(BaseModel):
+    id: int
     rx_cui: int
     spl_version: int
     set_id: str
@@ -141,7 +142,8 @@ def get_distinct_products(
 ) -> list[DrugLabelItem]:
     cursor.execute(
         """
-        SELECT rx_cui, spl_version, upload_dates, rx_strings
+        SELECT rx_cui, spl_version, set_id, upload_dates, rx_strings,
+            ROW_NUMBER() OVER() AS ID
         FROM distinct_products_per_ingredient
         WHERE ingredient_rx_cui = ?
         """,
@@ -152,8 +154,10 @@ def get_distinct_products(
         DrugLabelItem(
             rx_cui=row[0],
             spl_version=row[1],
-            dates=row[2].split(","),
-            rx_strings=row[3],
+            set_id=row[2],
+            dates=row[3].split(","),
+            rx_strings=row[4],
+            id=row[5],
         )
         for row in items
     ]
