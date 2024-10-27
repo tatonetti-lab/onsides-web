@@ -1,46 +1,44 @@
+import Link from "next/link";
 import React from "react";
-import Container from "react-bootstrap/Container";
+import { Button } from "@/components/ui/button";
 
-export default function Download() {
+export default function Download({}) {
   return (
-    <div className="body">
-      <Container>
-        <div className="home-title">
-          <h2> Downloads </h2>
-        </div>
+    <div>
+      <h1 className="mb-8"> Downloads </h1>
+      <p className="my-8">
+        This analysis is updated regularly. The latest data are available for
+        download in our{" "}
+        <Link href="https://github.com/tatonetti-lab/onsides/releases">
+          GitHub releases
+        </Link>
+        . For more information about the flat files, see the{" "}
+        <Link href="https://github.com/tatonetti-lab/onsides?tab=readme-ov-file#table-descriptions">
+          table descriptions
+        </Link>
+        .
+      </p>
 
-        <br />
-        <br />
-
-        <p>
-          This analysis is updated regularly. The latest data are available for
-          download in our{" "}
-          <a href="https://github.com/tatonetti-lab/onsides/releases">
-            GitHub releases
-          </a>
-          . For more information about the flat files, see the{" "}
-          <a href="https://github.com/tatonetti-lab/onsides?tab=readme-ov-file#table-descriptions">
-            table descriptions
-          </a>
-          .
-        </p>
-
-        <div className="my-4">
-          <a
+      <div className="my-8">
+        <Button asChild className="text-lg">
+          <Link
             href="https://github.com/tatonetti-lab/onsides/releases/latest"
-            className="bg-neutral-950 hover:bg-neutral-600 text-white hover:!text-neutral-100 py-2 px-4 rounded-full text-lg no-underline"
+            className="no-underline"
           >
             Download Latest Release
-          </a>
-        </div>
+          </Link>
+        </Button>
+      </div>
 
-        <h5>Note</h5>
+      <h4 className="mb-4">Note</h4>
+      <div className="flex flex-col gap-4">
         <p>
           The Onsides database is intended for research purposes only. The
           extraction process is imperfect, side effects will be missed and some
           identified will be incorrect. Patients seeking health information
-          should not trust these data and instead refer to the FDA's website
-          (fda.gov) and consult their doctor.
+          should not trust these data and instead refer to the FDA`&apos;`s
+          website (<Link href="https://fda.gov">fda.gov</Link>) and consult
+          their doctor.
         </p>
         <p>
           The project is under active development. Validation of extracted
@@ -49,10 +47,10 @@ export default function Download() {
           page for updates. If you would like to to contribute to the project or
           have ideas on how the methods, data, or evaluation can be improved
           please reach out to Prof. Tatonetti via{" "}
-          <a href="mailto:nicholas.tatonetti@cshs.org">email</a> or{" "}
-          <a href="https://twitter.com/proftatonetti">Twitter</a>.
+          <Link href="mailto:nicholas.tatonetti@cshs.org">email</Link> or{" "}
+          <Link href="https://twitter.com/proftatonetti">Twitter</Link>.
         </p>
-      </Container>
+      </div>
     </div>
   );
 }
