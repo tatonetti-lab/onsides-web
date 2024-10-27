@@ -6,7 +6,7 @@ import StatsTable from "../components/StatsTable";
 
 export default function Home() {
   return (
-    <div className="body">
+    <div>
       <Container>
         <div className="home-title">
           <h2> OnSIDES </h2>
