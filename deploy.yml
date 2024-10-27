@@ -14,20 +14,19 @@
       args:
         chdir: "{{ frontend_path }}"
       shell: |
-        bun run build
+        NEXT_PUBLIC_API_URL=https://onsidesdb.org bun run build
 
 - name: Deploy onsides website to Hetzner server
   hosts: hetzner
   become: yes
   vars:
-    frontend_path: "{{ playbook_dir }}/frontend"
     app_name: onsidesdb
     app_user: "{{ app_name }}"
     app_path: "/opt/{{ app_name }}"
+    frontend_path: "{{ playbook_dir }}/frontend"
+    frontend_build_path: "{{ app_path }}/frontend"
     backend_path: "{{ app_path }}/backend"
     venv_path: "{{ backend_path }}/.venv"
-    frontend_build_path: "{{ app_path }}/frontend/build"
-    static_path: "{{ frontend_build_path }}/static"
     domain_name: onsidesdb.org
     nginx_conf_path: "/etc/nginx/conf.d/{{ app_name }}.conf"
     nginx_basic_conf_file: "nginx-basic.conf"
@@ -59,7 +58,6 @@
       with_items:
         - "{{ app_path }}"
         - "{{ backend_path }}"
-        - "{{ static_path }}"
 
     - name: Copy .py files from the backend directory
       synchronize:
