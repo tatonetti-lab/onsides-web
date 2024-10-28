@@ -27,10 +27,10 @@ wget https://github.com/tatonetti-lab/onsides/releases/download/v2.1.0-20240925/
 tar -xzvf onsides_v2.1.0_20240925.tar.gz
 ```
 
-To create this file, use the `backend/etl.py` file.
-Specifically, pass the path to the unpacked data using the `--data` argument (i.e. `uv run backend/etl.py --data data/20240925`).
+To create the database, use the `etl/build-database.sh` file.
+You'll need to modify the first line to reference the path to the unpacked data directory.
 This will take a few minutes to run.
-Once complete, the `database.db` file should be ~850 MB.
+Once complete, the `database.db` file should be ~300 MB.
 
 This server depends on a single environmental variable (`ONSIDESDB`), which points to the database file.
 This must be set for the server to function properly.
@@ -93,7 +93,7 @@ Get the latest release online.
 # Change this to the latest release
 wget https://github.com/tatonetti-lab/onsides/releases/download/v2.1.0-20240925/onsides_v2.1.0_20240925.tar.gz
 tar -xzvf onsides_v2.1.0_20240925.tar.gz
-uv run backend/etl.py --data 20240925
+./etl/build-database.sh
 # This produces database.db
 ```
 
