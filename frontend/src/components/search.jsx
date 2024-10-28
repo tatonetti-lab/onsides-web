@@ -88,7 +88,7 @@ export default function SearchWithSuggestions() {
 
     return (
         <div className="relative w-full max-w-xl" onFocus={() => setOpen(true)} onBlur={() => setOpen(false)}>
-            <Command className="rounded-lg border">
+            <Command className="rounded-lg border bg-background text-foreground">
                 <CommandInput
                     placeholder="Search drugs or adverse reactions..."
                     value={value}
@@ -126,7 +126,7 @@ function SearchResults({ results, isLoading, onSelect }) {
                                     key={drug.ingredient_concept_id}
                                     value={drug.ingredient_concept_name}
                                     onSelect={() => onSelect('drug', drug.ingredient_concept_name, drug.ingredient_concept_id)}
-                                    className="flex items-center gap-2 py-3 cursor-pointer"
+                                    className="flex items-center gap-2 py-3 cursor-pointer bg-background"
                                 >
                                     <Pill className="h-4 w-4 text-blue-500 flex-shrink-0" />
                                     <div className="flex flex-col">
