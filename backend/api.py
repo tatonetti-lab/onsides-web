@@ -24,7 +24,7 @@ def get_all_drugs():
     cursor = con.cursor()
     cursor.execute(
         """
-        SELECT concept_name, rx_cui
+        SELECT ingredient_name, ingredient_rx_cui
         FROM ingredientpublic
         """
     )
@@ -68,9 +68,9 @@ def getDrugsByAdverseReaction(meddraID):
     # get adverse reaction name
     cursor.execute(
         """
-        SELECT pt_meddra_term, pt_meddra_id
-        FROM adversereactions
-        WHERE pt_meddra_id = ?
+        SELECT meddra_name AS concept_name, meddra_id
+        FROM adversereactionspublic
+        WHERE meddra_id = ?
         LIMIT 1
         """,
         (meddraID,),
@@ -127,9 +127,10 @@ class DrugInfoResponse(BaseModel):
 def get_drug_name(ingredient_rx_cui: int, cursor: sqlite3.Cursor) -> str | None:
     cursor.execute(
         """
-        SELECT concept_name
+        SELECT ingredient_name
         FROM ingredientpublic
-        WHERE rx_cui = ?
+        WHERE ingredient_rx_cui = ?
+        LIMIT 1
         """,
         (ingredient_rx_cui,),
     )

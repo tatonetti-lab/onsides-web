@@ -3,7 +3,7 @@
   connection: local
   gather_facts: false
   vars:
-    frontend_path: "{{ playbook_dir }}/frontend"
+    frontend_path: "{{ playbook_dir }}/../frontend"
   tasks:
     - name: Install frontend dependencies
       args:
@@ -23,15 +23,16 @@
     app_name: onsidesdb
     app_user: "{{ app_name }}"
     app_path: "/opt/{{ app_name }}"
-    frontend_path: "{{ playbook_dir }}/frontend"
+    frontend_path: "{{ playbook_dir }}/../frontend"
     frontend_build_path: "{{ app_path }}/frontend"
     backend_path: "{{ app_path }}/backend"
     venv_path: "{{ backend_path }}/.venv"
     domain_name: onsidesdb.org
     nginx_conf_path: "/etc/nginx/conf.d/{{ app_name }}.conf"
-    nginx_basic_conf_file: "nginx-basic.conf"
-    nginx_conf_file: "nginx.conf"
+    nginx_conf_file: "{{ playbook_dir }}/nginx.conf.j2"
     email_address: "michael.zietz@gmail.com"
+    flask_service_source: "{{ playbook_dir }}/flask-app.service.j2"
+    flask_service_dest: "/etc/systemd/system/{{ app_name }}.service"
   tasks:
     - name: Install required system packages
       apt:
@@ -61,7 +62,7 @@
 
     - name: Copy .py files from the backend directory
       synchronize:
-        src: "{{ playbook_dir }}/backend/"
+        src: "{{ playbook_dir }}/../backend/"
         dest: "{{ backend_path }}/"
         rsync_opts:
           - "--delete"
@@ -87,8 +88,8 @@
 
     - name: Create systemd service file
       template:
-        src: flask-app.service.j2
-        dest: /etc/systemd/system/{{ app_name }}.service
+        src: "{{ flask_service_source }}"
+        dest: "{{ flask_service_dest }}"
         mode: '0644'
 
     - name: Remove default Nginx configuration
@@ -102,7 +103,7 @@
 
     - name: Create Nginx configuration
       template:
-        src: nginx.conf.j2
+        src: "{{ nginx_conf_file }}"
         dest: "{{ nginx_conf_path }}"
         mode: '0644'
       notify: reload nginx
@@ -118,7 +119,7 @@
 
     - name: Rsync the database
       synchronize:
-        src: "{{ playbook_dir }}/database.db"
+        src: "{{ playbook_dir }}/../database.db"
         dest: "{{ app_path }}/database.db"
         rsync_opts:
           - "--compress"
