@@ -29,36 +29,19 @@ export default function Navbar() {
                         <OnsidesIcon className="h-8 w-8" />
                         <div className="text-lg">OnSIDES</div>
                     </Link>
-                    {/* Desktop nav */}
-                    <nav className="hidden md:flex gap-4">
-                        {links.map((link) => (
-                            <Link
-                                key={link.href}
-                                href={link.href}
-                                className="font-medium flex items-center text-md transition-colors no-underline"
-                                {...(link.isExternal && {
-                                    target: "_blank",
-                                    rel: "noopener noreferrer"
-                                })}
-                            >
-                                {link.label}
-                                {link.isExternal && (
-                                    <ExternalLink className="ml-1 h-4 w-4" />
-                                )}
-                            </Link>
-                        ))}
-                        <ThemeSwitcher />
-                    </nav>
+
                     {/* Mobile nav */}
                     <Sheet>
                         <div className="flex gap-2">
-                            <ThemeSwitcher />
-                            <SheetTrigger asChild className="md:hidden">
-                                <Button variant="ghost" size="icon" className="h-10 w-10">
-                                    <Menu className="h-10 w-10" />
-                                    <span className="sr-only">Toggle menu</span>
-                                </Button>
-                            </SheetTrigger>
+                            <div className="md:hidden">
+                                <ThemeSwitcher />
+                                <SheetTrigger asChild className="md:hidden">
+                                    <Button variant="ghost" size="icon" className="h-10 w-10">
+                                        <Menu className="h-10 w-10" />
+                                        <span className="sr-only">Toggle menu</span>
+                                    </Button>
+                                </SheetTrigger>
+                            </div>
                         </div>
                         <SheetContent side="right" className="w-[300px] sm:w-[400px] bg-white dark:bg-gray-950 border-l">
                             <nav className="flex flex-col gap-4 mt-8">
@@ -81,6 +64,27 @@ export default function Navbar() {
                             </nav>
                         </SheetContent>
                     </Sheet>
+
+                    {/* Desktop nav */}
+                    <nav className="hidden md:flex gap-4">
+                        {links.map((link) => (
+                            <Link
+                                key={link.href}
+                                href={link.href}
+                                className="font-medium flex items-center text-md transition-colors no-underline"
+                                {...(link.isExternal && {
+                                    target: "_blank",
+                                    rel: "noopener noreferrer"
+                                })}
+                            >
+                                {link.label}
+                                {link.isExternal && (
+                                    <ExternalLink className="ml-1 h-4 w-4" />
+                                )}
+                            </Link>
+                        ))}
+                        <ThemeSwitcher />
+                    </nav>
                 </div>
             </div>
         </nav>
