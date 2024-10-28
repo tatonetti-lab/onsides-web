@@ -88,7 +88,7 @@ export default function SearchWithSuggestions() {
 
     return (
         <div className="relative w-full max-w-xl" onFocus={() => setOpen(true)} onBlur={() => setOpen(false)}>
-            <Command className="rounded-lg border bg-background text-foreground">
+            <Command className="rounded-lg border dark:border-2 bg-background text-foreground">
                 <CommandInput
                     placeholder="Search drugs or adverse reactions..."
                     value={value}

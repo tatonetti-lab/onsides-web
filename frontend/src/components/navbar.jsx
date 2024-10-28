@@ -6,6 +6,7 @@ import {
     SheetContent,
     SheetTrigger,
 } from "@/components/ui/sheet";
+import ThemeSwitcher from "@/components/theme_switcher";
 
 export default function Navbar() {
     const links = [
@@ -21,7 +22,7 @@ export default function Navbar() {
     ];
 
     return (
-        <nav className="fixed inset-x-0 top-0 z-50 shadow-sm">
+        <nav className="fixed inset-x-0 top-0 z-50 shadow-sm bg-white dark:bg-gray-950">
             <div className="w-full max-w-7xl mx-auto px-4">
                 <div className="flex justify-between h-16 items-center">
                     <Link href="/" className="flex items-center gap-2 no-underline">
@@ -46,15 +47,19 @@ export default function Navbar() {
                                 )}
                             </Link>
                         ))}
+                        <ThemeSwitcher />
                     </nav>
                     {/* Mobile nav */}
                     <Sheet>
-                        <SheetTrigger asChild className="md:hidden">
-                            <Button variant="ghost" size="icon" className="h-10 w-10">
-                                <Menu className="h-10 w-10" />
-                                <span className="sr-only">Toggle menu</span>
-                            </Button>
-                        </SheetTrigger>
+                        <div className="flex gap-2">
+                            <ThemeSwitcher />
+                            <SheetTrigger asChild className="md:hidden">
+                                <Button variant="ghost" size="icon" className="h-10 w-10">
+                                    <Menu className="h-10 w-10" />
+                                    <span className="sr-only">Toggle menu</span>
+                                </Button>
+                            </SheetTrigger>
+                        </div>
                         <SheetContent side="right" className="w-[300px] sm:w-[400px] bg-white dark:bg-gray-950 border-l">
                             <nav className="flex flex-col gap-4 mt-8">
                                 {links.map((link) => (
