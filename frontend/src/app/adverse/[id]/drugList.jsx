@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
+
 import {
   Table,
   TableBody,
@@ -10,104 +10,29 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Input } from "@/components/ui/input";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination";
 import { Button } from "@/components/ui/button";
-import { ArrowUpDown } from "lucide-react";
+import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
 
 export default function DrugList({ drugs }) {
   const router = useRouter();
-  const [page, setPage] = useState(1);
-  const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
-  const [filters, setFilters] = useState({
-    name: "",
-    rxcui: "",
-  });
-  const itemsPerPage = 10;
+  const params = useSearchParams();
 
-  // Sort function
-  const sortData = (items) => {
-    if (!sortConfig.key) return items;
+  const sort = params.get("sort") ?? "name";
+  const order = params.get("order") ?? "asc";
 
-    return [...items].sort((a, b) => {
-      if (a[sortConfig.key] < b[sortConfig.key]) {
-        return sortConfig.direction === "asc" ? -1 : 1;
-      }
-      if (a[sortConfig.key] > b[sortConfig.key]) {
-        return sortConfig.direction === "asc" ? 1 : -1;
-      }
-      return 0;
-    });
-  };
-
-  // Filter function
-  const filterData = (items) => {
-    return items.filter((item) => {
-      const nameMatch = item.name
-        .toLowerCase()
-        .includes(filters.name.toLowerCase());
-      const rxcuiMatch = item.rxcui.toString().includes(filters.rxcui);
-      return nameMatch && rxcuiMatch;
-    });
-  };
-
-  // Handle sorting
-  const requestSort = (key) => {
-    const direction =
-      sortConfig.key === key && sortConfig.direction === "asc" ? "desc" : "asc";
-    setSortConfig({ key, direction });
-  };
-
-  // Process data
-  const { currentData, totalPages } = useMemo(() => {
-    const filteredData = filterData(drugs);
-    const sortedData = sortData(filteredData);
-    const totalPages = Math.ceil(sortedData.length / itemsPerPage);
-    const currentData = sortedData.slice(
-      (page - 1) * itemsPerPage,
-      page * itemsPerPage,
-    );
-    setPage(1);
-    return { currentData, totalPages };
-  }, [drugs, filters]);
-
-  // Generate page numbers
-  const getPageNumbers = () => {
-    const pages = [];
-    for (let i = 1; i <= totalPages; i++) {
-      if (i === 1 || i === totalPages || (i >= page - 1 && i <= page + 1)) {
-        pages.push(i);
-      } else if (i === page - 2 || i === page + 2) {
-        pages.push("...");
-      }
+  function requestSort(newSort) {
+    const p = new URLSearchParams(params);
+    p.set("sort", newSort);
+    if (sort === newSort && order === "asc") {
+      p.set("order", "desc");
+    } else {
+      p.set("order", "asc");
     }
-    return [...new Set(pages)];
-  };
+    router.replace(`?${p.toString()}`);
+  }
 
   return (
     <div className="w-full space-y-4">
-      {/* Filters */}
-      <div className="flex gap-4">
-        <Input
-          placeholder="Filter by name..."
-          value={filters.name}
-          onChange={(e) => setFilters({ ...filters, name: e.target.value })}
-          className="max-w-sm"
-        />
-        <Input
-          placeholder="Filter by RxCUI..."
-          value={filters.rxcui}
-          onChange={(e) => setFilters({ ...filters, rxcui: e.target.value })}
-          className="max-w-sm"
-        />
-      </div>
-
       {/* Table with fixed column widths */}
       <div className="relative overflow-x-auto">
         <Table>
@@ -120,23 +45,39 @@ export default function DrugList({ drugs }) {
                   className="h-8 flex items-center gap-2"
                 >
                   Name
-                  <ArrowUpDown className="w-4 h-4" />
+                  {sort === "name" ? (
+                    order === "asc" ? (
+                      <ArrowUp className="w-4 h-4" />
+                    ) : (
+                      <ArrowDown className="w-4 h-4" />
+                    )
+                  ) : (
+                    <ArrowUpDown className="w-4 h-4" />
+                  )}
                 </Button>
               </TableHead>
               <TableHead className="w-1/5">
                 <Button
                   variant="ghost"
-                  onClick={() => requestSort("rxcui")}
+                  onClick={() => requestSort("id")}
                   className="h-8 flex items-center gap-2"
                 >
                   RxCUI
-                  <ArrowUpDown className="w-4 h-4" />
+                  {sort === "id" ? (
+                    order === "asc" ? (
+                      <ArrowUp className="w-4 h-4" />
+                    ) : (
+                      <ArrowDown className="w-4 h-4" />
+                    )
+                  ) : (
+                    <ArrowUpDown className="w-4 h-4" />
+                  )}
                 </Button>
               </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {currentData.map((row, index) => (
+            {drugs.map((row, index) => (
               <TableRow
                 key={index}
                 className="cursor-pointer hover:bg-accent hover:text-accent-foreground"
@@ -149,51 +90,6 @@ export default function DrugList({ drugs }) {
           </TableBody>
         </Table>
       </div>
-
-      {/* Pagination */}
-      <Pagination>
-        <PaginationContent className="gap-1">
-          <PaginationItem className="">
-            <Button
-              variant="ghost"
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
-              className={`${page === 1 ? "pointer-events-none opacity-50" : "cursor-pointer hover:bg-accent hover:text-accent-foreground"}`}
-            >
-              <PaginationPrevious className="" />
-            </Button>
-          </PaginationItem>
-
-          {getPageNumbers().map((pageNumber, index) => (
-            <PaginationItem
-              key={index}
-              className="min-w-[2.25rem] flex justify-center"
-            >
-              {pageNumber === "..." ? (
-                <span className="px-2">⋯</span>
-              ) : (
-                <Button
-                  variant="ghost"
-                  onClick={() => setPage(pageNumber)}
-                  className={`h-9 w-9 p-0 cursor-pointer hover:bg-accent hover:text-accent-foreground
-                                        ${page === pageNumber ? "bg-accent text-accent-foreground" : ""}`}
-                >
-                  {pageNumber}
-                </Button>
-              )}
-            </PaginationItem>
-          ))}
-
-          <PaginationItem className="">
-            <Button
-              variant="ghost"
-              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-              className={`${page === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer hover:bg-accent hover:text-accent-foreground"}`}
-            >
-              <PaginationNext />
-            </Button>
-          </PaginationItem>
-        </PaginationContent>
-      </Pagination>
     </div>
   );
 }
