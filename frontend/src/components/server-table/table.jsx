@@ -1,5 +1,3 @@
-"use client";
-
 import PageNumbers from "@/components/server-table/page-numbers";
 import InnerTable from "@/components/server-table/inner-table";
 import FilterBox from "@/components/server-table/filter-box";
@@ -16,18 +14,17 @@ import FilterBox from "@/components/server-table/filter-box";
  * "name", "id" - For string searching (e.g. "?name=naproxe")
  * "page" - For pagination (e.g. "?page=1")
  */
-export default function ServerTable({
-  items,
-  path,
+export default async function ServerTable({
+  fields,
+  data,
+  linkPath,
   nTotalItems,
-  displayName = "name",
-  displayId = "ID",
 }) {
   const nPages = Math.ceil(nTotalItems / 10);
   return (
     <>
-      <FilterBox displayName={displayName} displayId={displayId} />
-      <InnerTable items={items} path={path} />
+      <FilterBox fields={fields} />
+      <InnerTable data={data} linkPath={linkPath} />
       <PageNumbers nPages={nPages} />
     </>
   );

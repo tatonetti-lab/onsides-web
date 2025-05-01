@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { usePathname, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import {
   Table,
   TableBody,
@@ -19,55 +19,63 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import { Button } from "@/components/ui/button";
-import { ArrowUpDown } from "lucide-react";
+import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
 import { generatePageNumbers } from "./server-table/utils";
 
 export default function ClientTable({
+  fields, // {name, displayName, width}
   data,
-  displayName = "name",
-  displayId = "ID",
+  linkPath,
 }) {
   const router = useRouter();
-  const pathname = usePathname();
   const [page, setPage] = useState(1);
-  const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
-  const [filters, setFilters] = useState({ name: "", id: "" });
+  const [sortConfig, setSortConfig] = useState({ key: null, order: "asc" });
+  const [filters, setFilters] = useState(() => {
+    return fields.reduce((acc, field) => {
+      acc[field.name] = "";
+      return acc;
+    }, {});
+  });
+
   const itemsPerPage = 10;
 
-  // Sort function
   const sortData = (items) => {
     if (!sortConfig.key) return items;
-
     return [...items].sort((a, b) => {
       if (a[sortConfig.key] < b[sortConfig.key]) {
-        return sortConfig.direction === "asc" ? -1 : 1;
+        return sortConfig.order === "asc" ? -1 : 1;
       }
       if (a[sortConfig.key] > b[sortConfig.key]) {
-        return sortConfig.direction === "asc" ? 1 : -1;
+        return sortConfig.order === "asc" ? 1 : -1;
       }
       return 0;
     });
   };
 
-  // Filter function
   const filterData = (items) => {
     return items.filter((item) => {
-      const nameMatch = item.name
-        .toLowerCase()
-        .includes(filters.name.toLowerCase());
-      const idMatch = item.id.toString().includes(filters.id);
-      return nameMatch && idMatch;
+      return fields.every((field) => {
+        const filterValue = filters[field.name].toLowerCase();
+        if (!filterValue) return true;
+        const itemValue = String(item[field.name]).toLowerCase();
+        return itemValue.includes(filterValue);
+      });
     });
   };
 
-  // Handle sorting
   const requestSort = (key) => {
-    const direction =
-      sortConfig.key === key && sortConfig.direction === "asc" ? "desc" : "asc";
-    setSortConfig({ key, direction });
+    const order =
+      sortConfig.key === key && sortConfig.order === "asc" ? "desc" : "asc";
+    setSortConfig({ key, order });
   };
 
-  // Process data
+  const handleFilterChange = (fieldName, value) => {
+    setFilters((prevFilters) => ({
+      ...prevFilters,
+      [fieldName]: value,
+    }));
+  };
+
   const filteredData = filterData(data);
   const sortedData = sortData(filteredData);
   const totalPages = Math.ceil(sortedData.length / itemsPerPage);
@@ -80,57 +88,60 @@ export default function ClientTable({
   return (
     <div className="w-full space-y-4">
       {/* Filters */}
-      <div className="flex gap-4">
-        <Input
-          placeholder={`Filter by ${displayName}...`}
-          value={filters.name}
-          onChange={(e) => setFilters({ ...filters, name: e.target.value })}
-          className="max-w-sm"
-        />
-        <Input
-          placeholder={`Filter by ${displayId}...`}
-          value={filters.id}
-          onChange={(e) => setFilters({ ...filters, id: e.target.value })}
-          className="max-w-sm"
-        />
+      <div className="w-full flex gap-4">
+        {fields.map((f) => (
+          <Input
+            placeholder={`Filter by ${f.displayName}`}
+            value={filters[f.name]}
+            onChange={(e) => handleFilterChange(f.name, e.target.value)}
+            key={`filter-${f.name}`}
+            className={`${f.width}`}
+          />
+        ))}
       </div>
 
       {/* Table with fixed column widths */}
-      <div className="relative overflow-x-auto">
+      <div className="relative overflow-x-auto flex">
         <Table>
           <TableHeader>
-            <TableRow>
-              <TableHead className="w-4/5">
-                <Button
-                  variant="ghost"
-                  onClick={() => requestSort("name")}
-                  className="h-8 flex items-center gap-2"
-                >
-                  {displayName}
-                  <ArrowUpDown className="w-4 h-4" />
-                </Button>
-              </TableHead>
-              <TableHead className="w-1/5">
-                <Button
-                  variant="ghost"
-                  onClick={() => requestSort("id")}
-                  className="h-8 flex items-center gap-2"
-                >
-                  {displayId}
-                  <ArrowUpDown className="w-4 h-4" />
-                </Button>
-              </TableHead>
+            <TableRow key={"header"}>
+              {fields.map((f) => (
+                <TableHead className={`${f.width}`} key={f.name}>
+                  <Button
+                    variant="ghost"
+                    onClick={() => requestSort(f.name)}
+                    className={`h-8 flex gap-2`}
+                  >
+                    {f.displayName}
+                    {sortConfig.key === f.name ? (
+                      sortConfig.order === "asc" ? (
+                        <ArrowUp className="w-4 h-4" />
+                      ) : (
+                        <ArrowDown className="w-4 h-4" />
+                      )
+                    ) : (
+                      <ArrowUpDown className="w-4 h-4" />
+                    )}
+                  </Button>
+                </TableHead>
+              ))}
             </TableRow>
           </TableHeader>
           <TableBody>
             {currentData.map((row, index) => (
               <TableRow
-                key={index}
+                key={`row-${index}`}
                 className="cursor-pointer hover:bg-accent hover:text-accent-foreground"
-                onClick={() => router.push(`${pathname}/${row.id}`)}
+                onClick={() => router.push(`/${linkPath}/${row.id}`)}
               >
-                <TableCell className="w-4/5">{row.name}</TableCell>
-                <TableCell className="w-1/5">{row.id}</TableCell>
+                {fields.map((f) => (
+                  <TableCell
+                    className={`ml-6 ${f.width}`}
+                    key={`row-${index}-${f.name}`}
+                  >
+                    {row[f.name]}
+                  </TableCell>
+                ))}
               </TableRow>
             ))}
           </TableBody>

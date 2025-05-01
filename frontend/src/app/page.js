@@ -2,26 +2,26 @@
 
 import Link from "next/link";
 import { Separator } from "@/components/ui/separator";
-import { db } from "@/lib/db";
+import { getDb } from "@/lib/db";
 import SearchWithSuggestions from "@/components/search";
 import DatabaseStats from "@/components/database_stats";
 
 async function getAllEntities() {
-  const ingredients = db
+  const ingredients = getDb
     .prepare(
       `SELECT rxnorm_id as id, rxnorm_name as name
        FROM vocab_rxnorm_ingredient;`,
     )
     .all();
 
-  const products = db
+  const products = getDb
     .prepare(
       `SELECT rxnorm_id as id, rxnorm_name as name
        FROM vocab_rxnorm_product;`,
     )
     .all();
 
-  const adverseEffects = db
+  const adverseEffects = getDb
     .prepare(
       `SELECT meddra_id as id, meddra_name as name
        FROM vocab_meddra_adverse_effect;`,

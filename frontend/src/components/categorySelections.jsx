@@ -15,7 +15,11 @@ import {
  * TODO: Ensure that selecting a source other than US disables section,
  * since, currently, only the US has different sections available.
  */
-export default function CategorySelectors() {
+export default function CategorySelectors({
+  showSource = true,
+  showSection = true,
+  showDrugKind = true,
+}) {
   const router = useRouter();
   const params = useSearchParams();
 
@@ -66,26 +70,32 @@ export default function CategorySelectors() {
 
   return (
     <div className="mb-8">
-      <CategoryGroup
-        title={"Drug type"}
-        current={drugKind}
-        setCurrent={setDrugKind}
-        options={drugKindOptions}
-      />
-      <CategoryGroup
-        title={"Source"}
-        current={source}
-        setCurrent={setSource}
-        options={sourceOptions}
-      />
-      <CategoryGroup
-        title={"Label section"}
-        current={section}
-        setCurrent={setSection}
-        options={sectionOptions}
-        disableTail={source !== "US"}
-        disabledTooltip="Label sections are only available for US labels"
-      />
+      {showDrugKind && (
+        <CategoryGroup
+          title={"Drug type"}
+          current={drugKind}
+          setCurrent={setDrugKind}
+          options={drugKindOptions}
+        />
+      )}
+      {showSource && (
+        <CategoryGroup
+          title={"Source"}
+          current={source}
+          setCurrent={setSource}
+          options={sourceOptions}
+        />
+      )}
+      {showSection && (
+        <CategoryGroup
+          title={"Label section"}
+          current={section}
+          setCurrent={setSection}
+          options={sectionOptions}
+          disableTail={source !== "US"}
+          disabledTooltip="Label sections are only available for US labels"
+        />
+      )}
     </div>
   );
 }

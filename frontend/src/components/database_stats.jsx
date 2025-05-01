@@ -8,10 +8,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { db } from "@/lib/db";
+import { getDb } from "@/lib/db";
 
 export default async function DatabaseStats() {
-  const stats = db
+  const stats = getDb
     .prepare(
       `SELECT 
         (SELECT COUNT(rxnorm_id) FROM vocab_rxnorm_ingredient) as n_ingredients,

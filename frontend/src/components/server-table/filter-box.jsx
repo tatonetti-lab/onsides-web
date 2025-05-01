@@ -12,13 +12,15 @@ import { Input } from "@/components/ui/input";
  * The current pathname should also take a "page" URLSearchParam, since
  * any change to the filtering results in a navigation to page number 1.
  */
-export default function FilterBox({ displayName, displayId }) {
+export default function FilterBox({ fields }) {
   const params = useSearchParams();
   const router = useRouter();
 
-  const [filters, setFilters] = useState({
-    name: params.get("name") ?? "",
-    id: params.get("id") ?? "",
+  const [filters, setFilters] = useState(() => {
+    return fields.reduce((acc, field) => {
+      acc[field.name] = "";
+      return acc;
+    }, {});
   });
 
   // debounce timer
@@ -30,8 +32,9 @@ export default function FilterBox({ displayName, displayId }) {
     timer.current = setTimeout(() => {
       const p = new URLSearchParams(params);
       p.set("page", "1");
-      p.set("name", filters.name);
-      p.set("id", filters.id);
+      Object.entries(filters).forEach(([key, value]) => {
+        p.set(key, value);
+      });
       router.replace(`?${p.toString()}`);
     }, 200); // ms time
 
@@ -40,18 +43,17 @@ export default function FilterBox({ displayName, displayId }) {
 
   return (
     <div className="flex gap-4">
-      <Input
-        placeholder={`Filter by ${displayName}…`}
-        value={filters.name}
-        onChange={(e) => setFilters((f) => ({ ...f, name: e.target.value }))}
-        className="max-w-sm"
-      />
-      <Input
-        placeholder={`Filter by ${displayId}…`}
-        value={filters.id}
-        onChange={(e) => setFilters((f) => ({ ...f, id: e.target.value }))}
-        className="max-w-sm"
-      />
+      {fields.map((f) => (
+        <Input
+          key={f.name}
+          placeholder={`Filter by ${f.displayName}…`}
+          value={filters[f.name]}
+          onChange={(e) =>
+            setFilters((x) => ({ ...x, [f.name]: e.target.value }))
+          }
+          className="max-w-sm"
+        />
+      ))}
     </div>
   );
 }
