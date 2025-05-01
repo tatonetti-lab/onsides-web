@@ -2,6 +2,13 @@
 
 import { Button } from "@/components/ui/button";
 import { useSearchParams, useRouter } from "next/navigation";
+import React from "react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "./ui/tooltip";
 
 /**
  * Category selector. Pathname must take "page", "source", and "section"
@@ -76,26 +83,58 @@ export default function CategorySelectors() {
         current={section}
         setCurrent={setSection}
         options={sectionOptions}
+        disableTail={source !== "US"}
+        disabledTooltip="Label sections are only available for US labels"
       />
     </div>
   );
 }
 
-function CategoryGroup({ title, current, setCurrent, options }) {
+function CategoryGroup({
+  title,
+  current,
+  setCurrent,
+  options,
+  disableTail = false,
+  disabledTooltip = "",
+}) {
   return (
     <>
       <div className="text-xl mb-2">{title}</div>
       <div className="w-full flex justify-start gap-2 mb-4">
         {options.map((option) => (
-          <Button
-            key={option.value}
-            variant="outline"
-            size="lg"
-            className={`${current === option.value ? "bg-primary text-primary-foreground" : ""}`}
-            onClick={() => setCurrent(option.value)}
-          >
-            {option.label}
-          </Button>
+          <React.Fragment key={option.value}>
+            {disableTail ? (
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span tabIndex={0}>
+                      <Button
+                        variant="outline"
+                        size="lg"
+                        className={`${current === option.value ? "bg-primary text-primary-foreground" : ""}`}
+                        disabled
+                      >
+                        {option.label}
+                      </Button>
+                    </span>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>{disabledTooltip}</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            ) : (
+              <Button
+                variant="outline"
+                size="lg"
+                className={`${current === option.value ? "bg-primary text-primary-foreground" : ""}`}
+                onClick={() => setCurrent(option.value)}
+              >
+                {option.label}
+              </Button>
+            )}
+          </React.Fragment>
         ))}
       </div>
     </>
