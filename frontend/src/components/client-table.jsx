@@ -70,6 +70,7 @@ export default function ClientTable({
   };
 
   const handleFilterChange = (fieldName, value) => {
+    setPage(1);
     setFilters((prevFilters) => ({
       ...prevFilters,
       [fieldName]: value,
