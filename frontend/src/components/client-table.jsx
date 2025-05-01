@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   Table,
   TableBody,
@@ -20,15 +20,18 @@ import {
 } from "@/components/ui/pagination";
 import { Button } from "@/components/ui/button";
 import { ArrowUpDown } from "lucide-react";
+import { generatePageNumbers } from "./server-table/utils";
 
-const AdverseEventDetailsTable = ({ data, eventName }) => {
+export default function ClientTable({
+  data,
+  displayName = "name",
+  displayId = "ID",
+}) {
   const router = useRouter();
+  const pathname = usePathname();
   const [page, setPage] = useState(1);
   const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
-  const [filters, setFilters] = useState({
-    ingredient: "",
-    rxcui: "",
-  });
+  const [filters, setFilters] = useState({ name: "", id: "" });
   const itemsPerPage = 10;
 
   // Sort function
@@ -49,11 +52,11 @@ const AdverseEventDetailsTable = ({ data, eventName }) => {
   // Filter function
   const filterData = (items) => {
     return items.filter((item) => {
-      const ingredientMatch = item.name
+      const nameMatch = item.name
         .toLowerCase()
-        .includes(filters.ingredient.toLowerCase());
-      const rxcuiMatch = item.rxcui.toString().includes(filters.rxcui);
-      return ingredientMatch && rxcuiMatch;
+        .includes(filters.name.toLowerCase());
+      const idMatch = item.id.toString().includes(filters.id);
+      return nameMatch && idMatch;
     });
   };
 
@@ -72,38 +75,22 @@ const AdverseEventDetailsTable = ({ data, eventName }) => {
     (page - 1) * itemsPerPage,
     page * itemsPerPage,
   );
-
-  // Generate page numbers
-  const getPageNumbers = () => {
-    const pages = [];
-    for (let i = 1; i <= totalPages; i++) {
-      if (i === 1 || i === totalPages || (i >= page - 1 && i <= page + 1)) {
-        pages.push(i);
-      } else if (i === page - 2 || i === page + 2) {
-        pages.push("...");
-      }
-    }
-    return [...new Set(pages)];
-  };
+  const pageNumbers = generatePageNumbers(page, totalPages);
 
   return (
     <div className="w-full space-y-4">
-      <h4>Drugs Associated with {eventName}</h4>
-
       {/* Filters */}
       <div className="flex gap-4">
         <Input
-          placeholder="Filter by ingredient..."
-          value={filters.ingredient}
-          onChange={(e) =>
-            setFilters({ ...filters, ingredient: e.target.value })
-          }
+          placeholder={`Filter by ${displayName}...`}
+          value={filters.name}
+          onChange={(e) => setFilters({ ...filters, name: e.target.value })}
           className="max-w-sm"
         />
         <Input
-          placeholder="Filter by RxCUI..."
-          value={filters.rxcui}
-          onChange={(e) => setFilters({ ...filters, rxcui: e.target.value })}
+          placeholder={`Filter by ${displayId}...`}
+          value={filters.id}
+          onChange={(e) => setFilters({ ...filters, id: e.target.value })}
           className="max-w-sm"
         />
       </div>
@@ -119,17 +106,17 @@ const AdverseEventDetailsTable = ({ data, eventName }) => {
                   onClick={() => requestSort("name")}
                   className="h-8 flex items-center gap-2"
                 >
-                  Ingredient
+                  {displayName}
                   <ArrowUpDown className="w-4 h-4" />
                 </Button>
               </TableHead>
               <TableHead className="w-1/5">
                 <Button
                   variant="ghost"
-                  onClick={() => requestSort("rxcui")}
+                  onClick={() => requestSort("id")}
                   className="h-8 flex items-center gap-2"
                 >
-                  RxCUI
+                  {displayId}
                   <ArrowUpDown className="w-4 h-4" />
                 </Button>
               </TableHead>
@@ -140,10 +127,10 @@ const AdverseEventDetailsTable = ({ data, eventName }) => {
               <TableRow
                 key={index}
                 className="cursor-pointer hover:bg-accent hover:text-accent-foreground"
-                onClick={() => router.push(`/drug/${row.rxcui}`)}
+                onClick={() => router.push(`${pathname}/${row.id}`)}
               >
                 <TableCell className="w-4/5">{row.name}</TableCell>
-                <TableCell className="w-1/5">{row.rxcui}</TableCell>
+                <TableCell className="w-1/5">{row.id}</TableCell>
               </TableRow>
             ))}
           </TableBody>
@@ -163,7 +150,7 @@ const AdverseEventDetailsTable = ({ data, eventName }) => {
             </Button>
           </PaginationItem>
 
-          {getPageNumbers().map((pageNumber, index) => (
+          {pageNumbers.map((pageNumber, index) => (
             <PaginationItem
               key={index}
               className="min-w-[2.25rem] flex justify-center"
@@ -196,6 +183,4 @@ const AdverseEventDetailsTable = ({ data, eventName }) => {
       </Pagination>
     </div>
   );
-};
-
-export default AdverseEventDetailsTable;
+}

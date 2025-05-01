@@ -1,8 +1,7 @@
 import { db } from "@/lib/db";
-import DrugList from "./drugList";
-import SearchBox from "./searchBoxes";
-import CategorySelectors from "./categorySelections";
-import PageNumbers from "./pageNumbers";
+import { HeartCrack } from "lucide-react";
+import ServerTable from "@/components/server-table/table";
+import CategorySelectors from "@/components/categorySelections";
 
 export default async function AdverseEffectPage({ params, searchParams }) {
   const { id } = await params;
@@ -18,7 +17,7 @@ export default async function AdverseEffectPage({ params, searchParams }) {
   const order = queryParams.order ?? "asc";
 
   const name = getName({ meddra_id: id });
-  const { drugs, nPages } = getDrugs({
+  const { drugs, nDrugs } = getDrugs({
     meddra_id: id,
     source,
     section,
@@ -32,16 +31,12 @@ export default async function AdverseEffectPage({ params, searchParams }) {
 
   return (
     <>
-      <h1 className="mb-4">{name}</h1>
+      <span className="flex flex-row gap-4 items-center mb-4">
+        <HeartCrack className="text-red-500 flex-shrink-0" />
+        <h1>{name}</h1>
+      </span>
       <CategorySelectors />
-      <SearchBox id={id} source={source} section={section} />
-      <DrugList drugs={drugs} />
-      <PageNumbers
-        source={source}
-        section={section}
-        currentPage={page}
-        nPages={nPages}
-      />
+      <ServerTable items={drugs} nTotalItems={nDrugs} displayId="RxCUI" />
     </>
   );
 }
@@ -117,5 +112,5 @@ function getDrugs({
 
   const drugs = db.query(query).all();
   const nDrugs = db.query(countQuery).get().nDrugs;
-  return { drugs, nPages: Math.ceil(nDrugs / 10) };
+  return { drugs, nDrugs };
 }

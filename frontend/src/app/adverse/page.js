@@ -1,4 +1,4 @@
-import AdverseEventsTable from "@/components/adverse_table";
+import ClientTable from "@/components/client-table";
 import { db } from "@/lib/db";
 
 export default async function AdversePage() {
@@ -13,7 +13,11 @@ export default async function AdversePage() {
   return (
     <div className="flex flex-col gap-4">
       <h2> Adverse Reactions </h2>
-      <AdverseEventsTable data={adverse} />
+      <ClientTable
+        data={adverse}
+        displayId={"MedDRA ID"}
+        displayName={"Concept Name"}
+      />
     </div>
   );
 }

@@ -13,7 +13,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
 
-export default function DrugList({ drugs }) {
+export default function InnerTable({ items }) {
   const router = useRouter();
   const params = useSearchParams();
 
@@ -77,7 +77,7 @@ export default function DrugList({ drugs }) {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {drugs.map((row, index) => (
+            {items.map((row, index) => (
               <TableRow
                 key={index}
                 className="cursor-pointer hover:bg-accent hover:text-accent-foreground"
