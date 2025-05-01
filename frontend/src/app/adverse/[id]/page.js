@@ -11,7 +11,7 @@ export default async function AdverseEffectPage({ params, searchParams }) {
   const section = queryParams.section ?? "ALL";
   const kind = queryParams.kind ?? "ingredient";
   const nameQuery = queryParams.name ?? "";
-  const rxcuiQuery = queryParams.rxcui ?? "";
+  const rxcuiQuery = queryParams.id ?? "";
   const page = Number(queryParams.page ?? 1);
   const sort = queryParams.sort ?? "name";
   const order = queryParams.order ?? "asc";
@@ -36,7 +36,12 @@ export default async function AdverseEffectPage({ params, searchParams }) {
         <h1>{name}</h1>
       </span>
       <CategorySelectors />
-      <ServerTable items={drugs} nTotalItems={nDrugs} displayId="RxCUI" />
+      <ServerTable
+        items={drugs}
+        nTotalItems={nDrugs}
+        displayId="RxCUI"
+        path={kind}
+      />
     </>
   );
 }
@@ -76,13 +81,13 @@ function getDrugs({
   const rxcuiFilter = rxcuiQuery
     ? `AND drug_rxnorm_id LIKE '%${rxcuiQuery}%'`
     : "";
-  const sortField = sort === "name" ? "name" : "rxcui";
+  const sortField = sort === "name" ? "name" : "id";
   const sortOrder = order === "asc" ? "ASC" : "DESC";
   const sorting = `ORDER BY ${sortField} ${sortOrder}`;
 
   const query = `
         SELECT DISTINCT 
-               drug_rxnorm_id as rxcui,
+               drug_rxnorm_id as id,
                drug_rxnorm_name as name
         FROM product_label
         INNER JOIN ${drug_table} USING (label_id)

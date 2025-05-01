@@ -14,6 +14,7 @@ export default function CategorySelectors() {
 
   const source = params.get("source") ?? "ALL";
   const section = params.get("section") ?? "ALL";
+  const drugKind = params.get("kind") ?? "ingredient";
 
   const sourceOptions = [
     { value: "ALL", label: "All" },
@@ -30,6 +31,11 @@ export default function CategorySelectors() {
     { value: "WP", label: "Warnings and Precautions" },
   ];
 
+  const drugKindOptions = [
+    { value: "ingredient", label: "Ingredients" },
+    { value: "product", label: "Products" },
+  ];
+
   function setSection(newSection) {
     const p = new URLSearchParams(params);
     p.set("section", newSection);
@@ -44,8 +50,21 @@ export default function CategorySelectors() {
     router.replace(`?${p.toString()}`);
   }
 
+  function setDrugKind(newDrugKind) {
+    const p = new URLSearchParams(params);
+    p.set("kind", newDrugKind);
+    p.set("page", 1);
+    router.replace(`?${p.toString()}`);
+  }
+
   return (
     <div className="mb-8">
+      <CategoryGroup
+        title={"Drug type"}
+        current={drugKind}
+        setCurrent={setDrugKind}
+        options={drugKindOptions}
+      />
       <CategoryGroup
         title={"Source"}
         current={source}

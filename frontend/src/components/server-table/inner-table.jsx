@@ -13,7 +13,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
 
-export default function InnerTable({ items }) {
+export default function InnerTable({ items, path }) {
   const router = useRouter();
   const params = useSearchParams();
 
@@ -81,10 +81,10 @@ export default function InnerTable({ items }) {
               <TableRow
                 key={index}
                 className="cursor-pointer hover:bg-accent hover:text-accent-foreground"
-                onClick={() => router.push(`/drug/${row.rxcui}`)}
+                onClick={() => router.push(`/${path}/${row.id}`)}
               >
                 <TableCell className="w-4/5">{row.name}</TableCell>
-                <TableCell className="w-1/5">{row.rxcui}</TableCell>
+                <TableCell className="w-1/5">{row.id}</TableCell>
               </TableRow>
             ))}
           </TableBody>

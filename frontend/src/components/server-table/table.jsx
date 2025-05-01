@@ -18,6 +18,7 @@ import FilterBox from "@/components/server-table/filter-box";
  */
 export default function ServerTable({
   items,
+  path,
   nTotalItems,
   displayName = "name",
   displayId = "ID",
@@ -26,7 +27,7 @@ export default function ServerTable({
   return (
     <>
       <FilterBox displayName={displayName} displayId={displayId} />
-      <InnerTable items={items} />
+      <InnerTable items={items} path={path} />
       <PageNumbers nPages={nPages} />
     </>
   );
