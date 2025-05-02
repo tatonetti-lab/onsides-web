@@ -11,7 +11,7 @@ import {
 import { getDb } from "@/lib/db";
 
 export default async function DatabaseStats() {
-  const stats = getDb
+  const stats = (await getDb())
     .prepare(
       `SELECT 
         (SELECT COUNT(rxnorm_id) FROM vocab_rxnorm_ingredient) as n_ingredients,

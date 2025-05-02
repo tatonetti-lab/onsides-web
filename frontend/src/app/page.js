@@ -7,21 +7,23 @@ import SearchWithSuggestions from "@/components/search";
 import DatabaseStats from "@/components/database_stats";
 
 async function getAllEntities() {
-  const ingredients = getDb
+  const db = await getDb();
+
+  const ingredients = db
     .prepare(
       `SELECT rxnorm_id as id, rxnorm_name as name
        FROM vocab_rxnorm_ingredient;`,
     )
     .all();
 
-  const products = getDb
+  const products = db
     .prepare(
       `SELECT rxnorm_id as id, rxnorm_name as name
        FROM vocab_rxnorm_product;`,
     )
     .all();
 
-  const adverseEffects = getDb
+  const adverseEffects = db
     .prepare(
       `SELECT meddra_id as id, meddra_name as name
        FROM vocab_meddra_adverse_effect;`,
