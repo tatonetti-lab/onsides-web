@@ -13,7 +13,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
 
-export default function InnerTable({ data, linkPath }) {
+export default function InnerTable({ fields, data, linkPath }) {
   const router = useRouter();
   const params = useSearchParams();
 
@@ -38,42 +38,26 @@ export default function InnerTable({ data, linkPath }) {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-4/5">
-                <Button
-                  variant="ghost"
-                  onClick={() => requestSort("name")}
-                  className="h-8 flex items-center gap-2"
-                >
-                  Name
-                  {sort === "name" ? (
-                    order === "asc" ? (
-                      <ArrowUp className="w-4 h-4" />
+              {fields.map((f) => (
+                <TableHead className={`${f.width}`} key={f.name}>
+                  <Button
+                    variant="ghost"
+                    onClick={() => requestSort(f.name)}
+                    className={`h-8 flex items-center gap-2`}
+                  >
+                    {f.displayName}
+                    {sort === f.name ? (
+                      order === "asc" ? (
+                        <ArrowUp className="w-4 h-4" />
+                      ) : (
+                        <ArrowDown className="w-4 h-4" />
+                      )
                     ) : (
-                      <ArrowDown className="w-4 h-4" />
-                    )
-                  ) : (
-                    <ArrowUpDown className="w-4 h-4" />
-                  )}
-                </Button>
-              </TableHead>
-              <TableHead className="w-1/5">
-                <Button
-                  variant="ghost"
-                  onClick={() => requestSort("id")}
-                  className="h-8 flex items-center gap-2"
-                >
-                  RxCUI
-                  {sort === "id" ? (
-                    order === "asc" ? (
-                      <ArrowUp className="w-4 h-4" />
-                    ) : (
-                      <ArrowDown className="w-4 h-4" />
-                    )
-                  ) : (
-                    <ArrowUpDown className="w-4 h-4" />
-                  )}
-                </Button>
-              </TableHead>
+                      <ArrowUpDown className="w-4 h-4" />
+                    )}
+                  </Button>
+                </TableHead>
+              ))}
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -83,8 +67,14 @@ export default function InnerTable({ data, linkPath }) {
                 className="cursor-pointer hover:bg-accent hover:text-accent-foreground"
                 onClick={() => router.push(`/${linkPath}/${row.id}`)}
               >
-                <TableCell className="w-4/5">{row.name}</TableCell>
-                <TableCell className="w-1/5">{row.id}</TableCell>
+                {fields.map((f) => (
+                  <TableCell
+                    className={`ml-6 ${f.width}`}
+                    key={`row-${index}-${f.name}`}
+                  >
+                    {row[f.name]}
+                  </TableCell>
+                ))}
               </TableRow>
             ))}
           </TableBody>

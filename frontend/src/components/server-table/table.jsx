@@ -24,7 +24,7 @@ export default async function ServerTable({
   return (
     <>
       <FilterBox fields={fields} />
-      <InnerTable data={data} linkPath={linkPath} />
+      <InnerTable fields={fields} data={data} linkPath={linkPath} />
       <PageNumbers nPages={nPages} />
     </>
   );

@@ -51,7 +51,7 @@ export default function FilterBox({ fields }) {
           onChange={(e) =>
             setFilters((x) => ({ ...x, [f.name]: e.target.value }))
           }
-          className="max-w-sm"
+          className={`${f.width}`}
         />
       ))}
     </div>
