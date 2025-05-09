@@ -3,9 +3,7 @@
 import "server-only";
 import { Database } from "bun:sqlite";
 
-const _db = new Database(
-  "/Users/zietzm/projects/onsides_v3/database/onsides.db",
-);
+const _db = new Database("/Users/zietzm/projects/onsides-web/onsides.db");
 
 export async function getDb(): Promise<Database> {
   return _db;
