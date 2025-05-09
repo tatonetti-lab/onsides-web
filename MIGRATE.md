@@ -1,5 +1,17 @@
 # Migration from v2 to v3
 
+## Overview
+
+I had to refactor the website to accomodate OnSIDES v3.
+The database schema changed and we added data from different sources.
+Also, we wanted to let users filter by product, ingredient, and adverse effect.
+To make this happen, I was transitioning the project from Flask+NextJS page router to just NextJS app router, which should simplify the app a lot.
+I made a bunch of pages already that have the additional functionality (e.g. filter by source).
+Unfortunately, I didn't finish.
+If you have any questions, I'll be online ([@zietzm](https://github.com/zietzm)).
+Feel free to Slack me or tag me in an issue.
+Good luck.
+
 ## History
 
 - V1 of the website used Flask for a JSON API, a statically-exported `create-react-app` frontend, and a MySQL database ([dhvanim](https://github.com/dhvanim) in 2022).
