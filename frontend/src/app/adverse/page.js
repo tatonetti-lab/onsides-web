@@ -3,7 +3,7 @@ import { getDb } from "@/lib/db";
 
 export default async function AdversePage() {
   const adverse = (await getDb())
-    .query(
+    .prepare(
       `SELECT meddra_name as name,
               meddra_id as id
         FROM vocab_meddra_adverse_effect;`,

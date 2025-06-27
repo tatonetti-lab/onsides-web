@@ -44,7 +44,7 @@ export default async function AdverseEffectPage({ params, searchParams }) {
       <ServerTable
         fields={fields}
         data={drugs}
-        linkPath={"product"}
+        linkPath={kind === "ingredient" ? "ingredient" : "product"}
         nTotalItems={nDrugs}
       />
     </>
@@ -57,5 +57,5 @@ async function getName({ meddra_id }) {
         FROM vocab_meddra_adverse_effect
         WHERE meddra_id = ${meddra_id};
     `;
-  return (await getDb()).query(query).get().meddra_name;
+  return (await getDb()).prepare(query).get().meddra_name;
 }

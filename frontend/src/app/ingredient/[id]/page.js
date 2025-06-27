@@ -6,54 +6,71 @@ import CategorySelectors from "@/components/categorySelections";
 export default async function IngredientPage({ params, searchParams }) {
   const { id } = await params;
   const queryParams = await searchParams;
-  const source = queryParams.source ?? "US";
-  const section = queryParams.section ?? "ALL";
-  const page = Number(queryParams.page ?? 1);
+  const category = queryParams.category ?? "adverse";
+  const page = Number(queryParams.page ?? 0);
 
   // Get the name of the ingredient
   const name = (await getDb())
-    .query(
+    .prepare(
       `SELECT rxnorm_name as name
        FROM vocab_rxnorm_ingredient
-       WHERE rxnorm_id = $id`,
+       WHERE rxnorm_id = ?`,
     )
-    .get({ $id: id }).name;
+    .get(id).name;
 
-  // Get the distinct products
-  // const products = db
-  //   .query(
-  //     `SELECT product_label.*
-  //      FROM vocab_rxnorm_ingredient_to_product
-  //      INNER JOIN product_to_rxnorm ON product_id = rxnorm_product_id
-  //      INNER JOIN product_label USING (label_id)
-  //      WHERE ingredient_id = $id AND source = $source;`,
-  //   )
-  //   .all({ $id: id, $source: source });
+  // Get adverse effects data for the ingredient
+  const adverseEffects = (await getDb())
+    .prepare(
+      `SELECT 
+         pt_meddra_id as concept_code,
+         pt_meddra_term as concept_name, 
+         product_rxcuis as rx_cuis,
+         ROUND(percent * 100, 2) as percent
+       FROM ingredient_to_percent_labels 
+       WHERE ingredient_rx_cui = ? 
+         AND category = ?
+       ORDER BY percent DESC;`
+    )
+    .all(id, category);
 
-  // // Get adverse reaction stats
-  // const stats = db
-  //   .query(
-  //     `SELECT
-  //          meddra_id,
-  //          meddra_name,
-  //          frac_labels
-  //      FROM
-  //          web_ingredient_meddra_summary
-  //      WHERE
-  //          ingredient_id = $ingredient_id
-  //          AND source = $source
-  //          AND label_section = $label_section
-  //      ORDER BY
-  //          meddra_name
-  //      LIMIT
-  //          50 OFFSET 150;
-  //      `,
-  //   )
-  //   .all({
-  //     $ingredient_id: id,
-  //     $source: source,
-  //     $label_section: label_section,
-  //   });
+  // Convert rx_cuis string to array of numbers
+  const drugInfo = adverseEffects.map((effect) => ({
+    ...effect,
+    rx_cuis: effect.rx_cuis
+      ? effect.rx_cuis.split(",").map((rxcui) => parseInt(rxcui.trim()))
+      : [],
+  }));
+
+  // Get distinct products/labels for this ingredient
+  const labels = (await getDb())
+    .prepare(
+      `SELECT DISTINCT
+         rx_cui,
+         set_id,
+         spl_version,
+         rx_strings
+       FROM distinct_products_per_ingredient 
+       WHERE ingredient_rx_cui = ?
+       ORDER BY rx_cui;`
+    )
+    .all(id);
+  console.log("Labels fetched:", labels.length);
+  // Transform labels data
+  const transformedLabels = labels.map((label, index) => ({
+    id: index + 1,
+    rx_cui: label.rx_cui,
+    set_id: label.set_id,
+    spl_version: label.spl_version,
+    rx_strings: label.rx_strings,
+    dates: label.upload_dates ? label.upload_dates.split(",") : [],
+  }));
+
+  // Group labels into pages (max 20 per page for performance)
+  const labelsPerPage = 20;
+  const pagedLabels = [];
+  for (let i = 0; i < transformedLabels.length; i += labelsPerPage) {
+    pagedLabels.push(transformedLabels.slice(i, i + labelsPerPage));
+  }
 
   return (
     <>
@@ -64,9 +81,9 @@ export default async function IngredientPage({ params, searchParams }) {
       <CategorySelectors showDrugKind={false} />
       <IngredientSummaryTable
         rxcui={id}
-        section={section}
-        drugInfo={[]}
-        drugLabels={[]}
+        category={category}
+        drugInfo={drugInfo}
+        drugLabels={pagedLabels}
         page={page}
       />
     </>

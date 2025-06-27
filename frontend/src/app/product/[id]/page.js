@@ -4,13 +4,14 @@ import ClientTable from "@/components/client-table";
 
 async function ProductInfo({ id }) {
   const labelRow = (await getDb())
-    .query(
+    .prepare(
       `SELECT source, source_product_name, source_product_id, source_label_url
        FROM product_label
        INNER JOIN product_to_rxnorm USING (label_id)
-       WHERE rxnorm_product_id = $id;`,
+       WHERE rxnorm_product_id = ?;`,
     )
-    .get({ $id: id });
+    .get(id);
+  console.log('labelRow', labelRow);
   function formatUSURL(rawUrl) {
     // Patch an issue in our database
     return rawUrl.replace("?", "?setid=");
@@ -20,6 +21,7 @@ async function ProductInfo({ id }) {
     // US source IDs were formatted like setId.version. Split this for display.
     return "Set ID: " + rawId.replace(".", ", Version: ");
   }
+  console.log('labelRow', labelRow);
   const url =
     labelRow.source === "US"
       ? formatUSURL(labelRow.source_label_url)
@@ -61,7 +63,7 @@ async function ProductInfo({ id }) {
 
 async function AdverseEventsTable({ id }) {
   const adverseEvents = (await getDb())
-    .query(
+    .prepare(
       `SELECT DISTINCT
               label_section as section,
               meddra_id as id,
@@ -71,9 +73,9 @@ async function AdverseEventsTable({ id }) {
        INNER JOIN product_to_rxnorm USING (label_id)
        INNER JOIN product_adverse_effect ON label_id = product_label_id
        INNER JOIN vocab_meddra_adverse_effect ON effect_meddra_id = meddra_id
-       WHERE rxnorm_product_id = $id;`,
+       WHERE rxnorm_product_id = ?;`,
     )
-    .all({ $id: id });
+    .all(id);
 
   const adverseFields = [
     { name: "name", displayName: "Name", width: "w-1/2" },
@@ -96,15 +98,15 @@ async function AdverseEventsTable({ id }) {
 
 async function IngredientsTable({ id }) {
   const ingredients = (await getDb())
-    .query(
+    .prepare(
       `SELECT DISTINCT rxnorm_id AS id, rxnorm_name AS name, rxnorm_term_type AS termtype
        FROM product_label
        INNER JOIN product_to_rxnorm USING (label_id)
        INNER JOIN vocab_rxnorm_ingredient_to_product ON rxnorm_product_id = product_id
        INNER JOIN vocab_rxnorm_ingredient ON ingredient_id = rxnorm_id
-       WHERE rxnorm_product_id = $id;`,
+       WHERE rxnorm_product_id = ?;`,
     )
-    .all({ $id: id });
+    .all(id);
 
   const ingredientFields = [
     { name: "name", displayName: "Name", width: "w-3/5" },
@@ -126,7 +128,7 @@ async function IngredientsTable({ id }) {
 
 export default async function ProductPage({ params }) {
   const { id } = await params;
-
+  
   return (
     <>
       <ProductInfo id={id} />
