@@ -28,7 +28,10 @@ tar -xzvf onsides_v2.1.0_20240925.tar.gz
 ```
 
 To create the database, use the `etl/build-database.sh` file.
-You'll need to modify the first line to reference the path to the unpacked data directory.
+**You'll need to modify the first line to reference the path to the unpacked data directory.**
+```bash 
+bash etl/build-database.sh
+```
 This will take a few minutes to run.
 Once complete, the `database.db` file should be ~300 MB.
 

@@ -1,11 +1,11 @@
 "use server";
 
 import "server-only";
-import { Database } from "bun:sqlite";
+import Database, { Database as DatabaseType } from "better-sqlite3";
 
-const _db = new Database("/Users/zietzm/projects/onsides-web/onsides.db");
+const _db = new Database("/Users/czarnyr/Documents/onsides-web/database.db");
 
-export async function getDb(): Promise<Database> {
+export async function getDb(): Promise<DatabaseType> {
   return _db;
 }
 
@@ -118,7 +118,82 @@ export async function getDrugs({
               ${rxcuiFilter};
     `;
 
-  const drugs: NamedId[] = _db.query<null, NamedId[]>(query).all();
-  const nDrugs = (_db.query(countQuery).get() as Count).number;
+  const drugs: NamedId[] = _db.prepare<null, NamedId[]>(query).all();
+  const nDrugs = (_db.prepare(countQuery).get() as Count).number;
   return { drugs, nDrugs };
+}
+
+export async function getIngredientData({
+  ingredientId,
+  category = "adverse",
+  source = "US",
+  section = "ALL",
+}: {
+  ingredientId: string;
+  category?: string;
+  source?: string;
+  section?: string;
+}) {
+  const db = await getDb();
+
+  // Get adverse effects data for the ingredient
+  const adverseEffects = db
+    .prepare(
+      `SELECT 
+         pt_meddra_id as concept_code,
+         pt_meddra_term as concept_name, 
+         product_rxcuis as rx_cuis,
+         ROUND(percent * 100, 2) as percent
+       FROM ingredient_to_percent_labels 
+       WHERE ingredient_rx_cui = $ingredientId 
+         AND category = $category
+       ORDER BY percent DESC;`
+    )
+    .all({
+      $ingredientId: ingredientId,
+      $category: category,
+    });
+
+  // Convert rx_cuis string to array of numbers
+  const drugInfo = adverseEffects.map((effect) => ({
+    ...effect,
+    rx_cuis: effect.rx_cuis
+      ? effect.rx_cuis.split(",").map((id) => parseInt(id.trim()))
+      : [],
+  }));
+
+  // Get distinct products/labels for this ingredient
+  const labels = db
+    .prepare(
+      `SELECT DISTINCT
+         rx_cui,
+         set_id,
+         spl_version,
+         rx_strings
+       FROM distinct_products_per_ingredient 
+       WHERE ingredient_rx_cui = $ingredientId
+       ORDER BY rx_cui;`
+    )
+    .all({ $ingredientId: ingredientId });
+
+  // Transform labels data to match expected format
+  const drugLabels = labels.map((label, index) => ({
+    id: index + 1,
+    rx_cui: label.rx_cui,
+    set_id: label.set_id,
+    spl_version: label.spl_version,
+    rx_strings: label.rx_strings,
+  }));
+
+  // Group labels into pages (max 20 per page for performance)
+  const labelsPerPage = 20;
+  const pagedLabels = [];
+  for (let i = 0; i < drugLabels.length; i += labelsPerPage) {
+    pagedLabels.push(drugLabels.slice(i, i + labelsPerPage));
+  }
+
+  return {
+    drugInfo,
+    drugLabels: pagedLabels,
+  };
 }

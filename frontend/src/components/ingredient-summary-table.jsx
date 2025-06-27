@@ -93,7 +93,7 @@ export default function IngredientSummaryTable({
                             <TooltipProvider>
                               <Tooltip>
                                 <TooltipTrigger asChild>
-                                  <a
+                                  <Link
                                     href={`https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=${lbl.set_id}`}
                                     target="_blank"
                                     rel="noopener noreferrer"
@@ -105,7 +105,7 @@ export default function IngredientSummaryTable({
                                     >
                                       {lbl.id}
                                     </Button>
-                                  </a>
+                                  </Link>
                                 </TooltipTrigger>
                                 <TooltipContent>
                                   <div className="space-y-1 text-sm">
@@ -164,18 +164,12 @@ export default function IngredientSummaryTable({
               <Pagination>
                 <PaginationContent className="gap-0">
                   <PaginationItem>
-                    <Link
-                      href={{
-                        pathname: `/product/${rxcui}`,
-                        query: { category, page: Math.max(0, page - 1) },
-                      }}
-                    >
-                      <PaginationPrevious
-                        className={
-                          page === 0 ? "pointer-events-none opacity-50" : ""
-                        }
-                      />
-                    </Link>
+                    <PaginationPrevious
+                      href={`/ingredient/${rxcui}?category=${category}&page=${Math.max(0, page - 1)}`}
+                      className={
+                        page === 0 ? "pointer-events-none opacity-50" : ""
+                      }
+                    />
                   </PaginationItem>
 
                   {pageNumbers.map((p, i) => (
@@ -185,7 +179,7 @@ export default function IngredientSummaryTable({
                       ) : (
                         <Link
                           href={{
-                            pathname: `/drug/${rxcui}`,
+                            pathname: `/ingredient/${rxcui}`,
                             query: { category, page: p },
                           }}
                         >
@@ -201,23 +195,14 @@ export default function IngredientSummaryTable({
                   ))}
 
                   <PaginationItem>
-                    <Link
-                      href={{
-                        pathname: `/drug/${rxcui}`,
-                        query: {
-                          category,
-                          page: Math.min(totalPages - 1, page + 1),
-                        },
-                      }}
-                    >
-                      <PaginationNext
-                        className={
-                          page === totalPages - 1
-                            ? "pointer-events-none opacity-50"
-                            : ""
-                        }
-                      />
-                    </Link>
+                    <PaginationNext
+                      href={`/ingredient/${rxcui}?category=${category}&page=${Math.min(totalPages - 1, page + 1)}`}
+                      className={
+                        page === totalPages - 1
+                          ? "pointer-events-none opacity-50"
+                          : ""
+                      }
+                    />
                   </PaginationItem>
                 </PaginationContent>
               </Pagination>

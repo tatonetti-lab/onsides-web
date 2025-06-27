@@ -24,7 +24,7 @@ export default async function DrugsPage({ searchParams, pathName }) {
 
   const db = await getDb();
   const drugs = db
-    .query(
+    .prepare(
       `SELECT rxnorm_id as id, rxnorm_name as name
        FROM ${table}
        WHERE rxnorm_name LIKE '%${nameQuery}%'
@@ -35,7 +35,7 @@ export default async function DrugsPage({ searchParams, pathName }) {
     .all();
 
   const nDrugs = db
-    .query(
+    .prepare(
       `SELECT COUNT(*) as number 
        FROM ${table}
        WHERE rxnorm_name LIKE '%${nameQuery}%'
