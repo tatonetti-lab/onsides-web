@@ -6,5 +6,6 @@ rm -f loaded.db
 
 cat ../../etl/load.sql | duckdb
 cat ../../etl/format.sql | sqlite3 loaded.db
+cat ../../etl/derived-tables.sql | sqlite3 loaded.db
 
 mv loaded.db ../../database.db
