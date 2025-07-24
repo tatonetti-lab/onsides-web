@@ -3,7 +3,7 @@
 import "server-only";
 import Database, { Database as DatabaseType } from "better-sqlite3";
 
-const _db = new Database("/Users/czarnyr/Documents/onsides-web/database.db");
+const _db = new Database("/opt/onsides-web/database.db");
 
 export async function getDb(): Promise<DatabaseType> {
   return _db;
