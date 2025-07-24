@@ -1,0 +1,37 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+    --foreground-rgb: 0, 0, 0;
+    --background-rgb: 255, 255, 255;
+}
+
+/* @media (prefers-color-scheme: dark) { */
+/*   :root { */
+/*     --foreground-rgb: 255, 255, 255; */
+/*     --background-rgb: 34, 36, 37; */
+/*   } */
+/* } */
+
+body {
+    color: rgb(var(--foreground-rgb));
+    background: rgb(var(--background-rgb));
+}
+
+.header {
+    color: rgb(var(--foreground-rgb));
+    background: rgb(var(--background-rgb));
+}
+
+@layer base {
+    h1 {
+        @apply text-5xl font-light leading-normal;
+    }
+    h2 {
+        @apply text-3xl leading-normal;
+    }
+    h3 {
+        @apply text-xl leading-normal;
+    }
+}
