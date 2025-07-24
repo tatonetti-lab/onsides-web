@@ -19,52 +19,64 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import { Button } from "@/components/ui/button";
-import { ArrowUpDown } from "lucide-react";
+import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
+import { generatePageNumbers } from "./server-table/utils";
 
-const AdverseEventDetailsTable = ({ data, eventName }) => {
+export default function ClientTable({
+  fields, // {name, displayName, width}
+  data,
+  linkPath,
+}) {
   const router = useRouter();
   const [page, setPage] = useState(1);
-  const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
-  const [filters, setFilters] = useState({
-    ingredient: "",
-    rxcui: "",
+  const [sortConfig, setSortConfig] = useState({ key: null, order: "asc" });
+  const [filters, setFilters] = useState(() => {
+    return fields.reduce((acc, field) => {
+      acc[field.name] = "";
+      return acc;
+    }, {});
   });
+
   const itemsPerPage = 10;
 
-  // Sort function
   const sortData = (items) => {
     if (!sortConfig.key) return items;
-
     return [...items].sort((a, b) => {
       if (a[sortConfig.key] < b[sortConfig.key]) {
-        return sortConfig.direction === "asc" ? -1 : 1;
+        return sortConfig.order === "asc" ? -1 : 1;
       }
       if (a[sortConfig.key] > b[sortConfig.key]) {
-        return sortConfig.direction === "asc" ? 1 : -1;
+        return sortConfig.order === "asc" ? 1 : -1;
       }
       return 0;
     });
   };
 
-  // Filter function
   const filterData = (items) => {
     return items.filter((item) => {
-      const ingredientMatch = item.name
-        .toLowerCase()
-        .includes(filters.ingredient.toLowerCase());
-      const rxcuiMatch = item.rxcui.toString().includes(filters.rxcui);
-      return ingredientMatch && rxcuiMatch;
+      return fields.every((field) => {
+        const filterValue = filters[field.name].toLowerCase();
+        if (!filterValue) return true;
+        const itemValue = String(item[field.name]).toLowerCase();
+        return itemValue.includes(filterValue);
+      });
     });
   };
 
-  // Handle sorting
   const requestSort = (key) => {
-    const direction =
-      sortConfig.key === key && sortConfig.direction === "asc" ? "desc" : "asc";
-    setSortConfig({ key, direction });
+    const order =
+      sortConfig.key === key && sortConfig.order === "asc" ? "desc" : "asc";
+    setSortConfig({ key, order });
   };
 
-  // Process data
+  const handleFilterChange = (fieldName, value) => {
+    setPage(1);
+    setFilters((prevFilters) => ({
+      ...prevFilters,
+      [fieldName]: value,
+    }));
+  };
+
   const filteredData = filterData(data);
   const sortedData = sortData(filteredData);
   const totalPages = Math.ceil(sortedData.length / itemsPerPage);
@@ -72,78 +84,65 @@ const AdverseEventDetailsTable = ({ data, eventName }) => {
     (page - 1) * itemsPerPage,
     page * itemsPerPage,
   );
-
-  // Generate page numbers
-  const getPageNumbers = () => {
-    const pages = [];
-    for (let i = 1; i <= totalPages; i++) {
-      if (i === 1 || i === totalPages || (i >= page - 1 && i <= page + 1)) {
-        pages.push(i);
-      } else if (i === page - 2 || i === page + 2) {
-        pages.push("...");
-      }
-    }
-    return [...new Set(pages)];
-  };
+  const pageNumbers = generatePageNumbers(page, totalPages);
 
   return (
     <div className="w-full space-y-4">
-      <h4>Drugs Associated with {eventName}</h4>
-
       {/* Filters */}
-      <div className="flex gap-4">
-        <Input
-          placeholder="Filter by ingredient..."
-          value={filters.ingredient}
-          onChange={(e) =>
-            setFilters({ ...filters, ingredient: e.target.value })
-          }
-          className="max-w-sm"
-        />
-        <Input
-          placeholder="Filter by RxCUI..."
-          value={filters.rxcui}
-          onChange={(e) => setFilters({ ...filters, rxcui: e.target.value })}
-          className="max-w-sm"
-        />
+      <div className="w-full flex gap-4">
+        {fields.map((f) => (
+          <Input
+            placeholder={`Filter by ${f.displayName}`}
+            value={filters[f.name]}
+            onChange={(e) => handleFilterChange(f.name, e.target.value)}
+            key={`filter-${f.name}`}
+            className={`${f.width}`}
+          />
+        ))}
       </div>
 
       {/* Table with fixed column widths */}
-      <div className="relative overflow-x-auto">
+      <div className="relative overflow-x-auto flex">
         <Table>
           <TableHeader>
-            <TableRow>
-              <TableHead className="w-4/5">
-                <Button
-                  variant="ghost"
-                  onClick={() => requestSort("name")}
-                  className="h-8 flex items-center gap-2"
-                >
-                  Ingredient
-                  <ArrowUpDown className="w-4 h-4" />
-                </Button>
-              </TableHead>
-              <TableHead className="w-1/5">
-                <Button
-                  variant="ghost"
-                  onClick={() => requestSort("rxcui")}
-                  className="h-8 flex items-center gap-2"
-                >
-                  RxCUI
-                  <ArrowUpDown className="w-4 h-4" />
-                </Button>
-              </TableHead>
+            <TableRow key={"header"}>
+              {fields.map((f) => (
+                <TableHead className={`${f.width}`} key={f.name}>
+                  <Button
+                    variant="ghost"
+                    onClick={() => requestSort(f.name)}
+                    className={`h-8 flex gap-2`}
+                  >
+                    {f.displayName}
+                    {sortConfig.key === f.name ? (
+                      sortConfig.order === "asc" ? (
+                        <ArrowUp className="w-4 h-4" />
+                      ) : (
+                        <ArrowDown className="w-4 h-4" />
+                      )
+                    ) : (
+                      <ArrowUpDown className="w-4 h-4" />
+                    )}
+                  </Button>
+                </TableHead>
+              ))}
             </TableRow>
           </TableHeader>
           <TableBody>
             {currentData.map((row, index) => (
               <TableRow
-                key={index}
+                key={`row-${index}`}
                 className="cursor-pointer hover:bg-accent hover:text-accent-foreground"
-                onClick={() => router.push(`/drug/${row.rxcui}`)}
+                onClick={() => router.push(`/${linkPath}/${row.id}`)}
               >
-                <TableCell className="w-4/5">{row.name}</TableCell>
-                <TableCell className="w-1/5">{row.rxcui}</TableCell>
+                {fields.map((f) => (
+                  <TableCell
+                    className={`ml-6 ${f.width}`}
+                    key={`row-${index}-${f.name}`}
+                  >
+                    {row[f.name]}
+                  </TableCell>
+                ))}
               </TableRow>
             ))}
           </TableBody>
@@ -163,7 +162,7 @@ const AdverseEventDetailsTable = ({ data, eventName }) => {
             </Button>
           </PaginationItem>
 
-          {getPageNumbers().map((pageNumber, index) => (
+          {pageNumbers.map((pageNumber, index) => (
             <PaginationItem
               key={index}
               className="min-w-[2.25rem] flex justify-center"
@@ -196,6 +195,4 @@ const AdverseEventDetailsTable = ({ data, eventName }) => {
       </Pagination>
     </div>
   );
-};
-
-export default AdverseEventDetailsTable;
+}

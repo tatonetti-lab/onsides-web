@@ -45,7 +45,7 @@ SELECT ingredient_rx_cui,
 FROM ingredients
          INNER JOIN adversereactionsactivelabels USING (set_id)
          INNER JOIN (SELECT * FROM rxnormmappings WHERE rx_tty = 'PSN') AS psns
-                    USING (set_id, spl_version)
+                    USING (set_id)
 GROUP BY ingredient_rx_cui, pt_meddra_id, pt_meddra_term;
 
 
@@ -58,7 +58,7 @@ SELECT ingredient_rx_cui,
 FROM ingredients
          INNER JOIN boxedwarningsactivelabels USING (set_id)
          INNER JOIN (SELECT * FROM rxnormmappings WHERE rx_tty = 'PSN') AS psns
-                    USING (set_id, spl_version)
+                    USING (set_id)
 GROUP BY ingredient_rx_cui, pt_meddra_id, pt_meddra_term;
 
 CREATE TABLE labels_per_ingredient_warnings AS
@@ -70,7 +70,7 @@ SELECT ingredient_rx_cui,
 FROM ingredients
          INNER JOIN warningsandprecautionsactivelabels USING (set_id)
          INNER JOIN (SELECT * FROM rxnormmappings WHERE rx_tty = 'PSN') AS psns
-                    USING (set_id, spl_version)
+                    USING (set_id)
 GROUP BY ingredient_rx_cui, pt_meddra_id, pt_meddra_term;
 
 

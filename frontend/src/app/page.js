@@ -1,72 +1,50 @@
+"use server";
+
 import Link from "next/link";
 import { Separator } from "@/components/ui/separator";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { useEffect, useState } from "react";
+import { getDb } from "@/lib/db";
 import SearchWithSuggestions from "@/components/search";
-import { config } from "@/lib/config";
+import DatabaseStats from "@/components/database_stats";
 
-export default function Home() {
+async function getAllEntities() {
+  const db = await getDb();
+
+  const ingredients = db
+    .prepare(
+      `SELECT rxnorm_id as id, rxnorm_name as name
+       FROM vocab_rxnorm_ingredient;`,
+    )
+    .all();
+
+  const products = db
+    .prepare(
+      `SELECT rxnorm_id as id, rxnorm_name as name
+       FROM vocab_rxnorm_product;`,
+    )
+    .all();
+
+  const adverseEffects = db
+    .prepare(
+      `SELECT meddra_id as id, meddra_name as name
+       FROM vocab_meddra_adverse_effect;`,
+    )
+    .all();
+
+  return { ingredients, products, adverseEffects };
+}
+
+export default async function Home() {
+  const { ingredients, products, adverseEffects } = await getAllEntities();
   return (
     <div className="flex flex-col gap-8">
       <Heading />
-      <SearchWithSuggestions />
-      <BasicStats />
+      <SearchWithSuggestions
+        ingredients={ingredients}
+        products={products}
+        adverseEffects={adverseEffects}
+      />
+      <DatabaseStats />
       <About />
-    </div>
-  );
-}
-
-function BasicStats() {
-  const [stats, setStats] = useState({
-    adverseReactions: ".",
-    drugs: " ",
-    pairs: " ",
-  });
-
-  const getStats = async () => {
-    return fetch(`${config.apiUrl}/api/stats`)
-      .then((res) => res.json())
-      .then((data) => {
-        return data;
-      });
-  };
-
-  useEffect(() => {
-    getStats().then((res) => {
-      setStats({
-        adverseReactions: res.adverse_reactions,
-        drugs: res.drugs,
-        pairs: res.pairs,
-      });
-    });
-  }, []);
-
-  return (
-    <div className="flex flex-col gap-4">
-      <h2>Basic Statistics</h2>
-      <Table className="text-md">
-        <TableHeader>
-          <TableRow>
-            <TableHead>Drugs</TableHead>
-            <TableHead>Adverse Reactions</TableHead>
-            <TableHead>Drug/Adverse Reactions Pairs</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          <TableRow>
-            <TableCell>{stats.drugs}</TableCell>
-            <TableCell>{stats.adverseReactions}</TableCell>
-            <TableCell>{stats.pairs}</TableCell>
-          </TableRow>
-        </TableBody>
-      </Table>
     </div>
   );
 }
