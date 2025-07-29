@@ -23,6 +23,7 @@
     "azure-openai": "^0.9.4",
     "bcryptjs": "^2.4.3",
     "dotenv": "^16.4.5",
+    "file-saver": "^2.0.5",
     "isbot": "^4.1.0",
     "jwt-decode": "^4.0.0",
     "langchain": "^0.3.19",
