@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from '@remix-run/react';
-import { Typography, Box, Button, IconButton, Tooltip, TextField, Divider } from '@mui/material';
+import { Typography, Box, Button, IconButton, Tooltip, TextField, Divider, CircularProgress } from '@mui/material';
 import { BasePage } from '~/utils/BasePage';
 import { useEffect, useState } from 'react';
 import { getAdverseEffectIngredients } from '~/utils/getAdverseEffectIngredients';
@@ -46,9 +46,11 @@ const AdverseEffectDetailPage = () => {
     const [ingredientIdFilter, setIngredientIdFilter] = useState('');
     const [productNameFilter, setProductNameFilter] = useState('');
     const [productIdFilter, setProductIdFilter] = useState('');
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         if (!id) return;
+        setLoading(true);
         const fetchData = async () => {
             const data = await getAdverseEffect(id);
             setAdverseEffectDetails(data.adverseEffect[0] as AdverseEffectDetails);
@@ -58,6 +60,7 @@ const AdverseEffectDetailPage = () => {
             setSources(['All', ...Array.from(new Set(sources)) as string[]]);
             const sections = (ingredients.adverseEffects || []).map((effect: IngredientRow & ProductRow) => effect.label_section).filter(Boolean);
             setSections(['All', ...Array.from(new Set(sections)).filter(section => section !== 'NA') as string[]]);
+            setLoading(false);
         };
         fetchData();
     }, [id]);
@@ -112,6 +115,17 @@ const AdverseEffectDetailPage = () => {
     // Reset page on filter change
     useEffect(() => { setIngredientsPage(0); }, [selectedSource, selectedSection, ingredientNameFilter, ingredientIdFilter]);
     useEffect(() => { setProductsPage(0); }, [selectedSource, selectedSection, productNameFilter, productIdFilter]);
+
+    if (loading) {
+        return (
+            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '40vh', width: '100%' }}>
+                <Typography variant="h5" sx={{ mb: 2 }}>Preparing adverse effect details...</Typography>
+                <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                    <CircularProgress size={50} />
+                </Box>
+            </Box>
+        );
+    }
 
     return (
         <>

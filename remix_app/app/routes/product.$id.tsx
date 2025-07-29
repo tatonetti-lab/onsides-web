@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from '@remix-run/react';
-import { Typography, Box, Paper, Divider } from '@mui/material';
+import { Typography, Box, Paper, Divider, CircularProgress, Button } from '@mui/material';
 import { BasePage } from '~/utils/BasePage';
 import { useEffect, useState } from 'react';
 import { getProductDetails } from '~/utils/getProductDetails';
@@ -37,19 +37,19 @@ const ProductDetailPage = () => {
     const [ingredientsSort, setIngredientsSort] = useState<{ column: keyof Ingredient | null; direction: 'asc' | 'desc' | null }>({ column: null, direction: null });
     const [adverseEffectsSort, setAdverseEffectsSort] = useState<{ column: keyof AdverseEffect | null; direction: 'asc' | 'desc' | null }>({ column: null, direction: null });
     const rowsPerPage = 10;
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const fetchData = async () => {
             if (!id) return;
-            
+            setLoading(true);
             const data = await getProductDetails(id);
             setProductDetails(data.product[0]);
-
             const ingredients = await getProductIngredients(id);
-            console.log(ingredients);
             setProductIngredients(ingredients.productIngredients || []);
             const adverseEffects = await getProductAdverseEffects(id);
             setProductAdverseEffects(adverseEffects.productAdverseEffects || []);
+            setLoading(false);
         };
         fetchData();
     }, [id]);
@@ -131,6 +131,17 @@ const ProductDetailPage = () => {
     );
     const adverseEffectsTotalPages = Math.ceil(sortedAdverseEffects.length / rowsPerPage);
 
+    if (loading) {
+        return (
+            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '40vh', width: '100%' }}>
+                <Typography variant="h5" sx={{ mb: 2 }}>Preparing product details...</Typography>
+                <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                    <CircularProgress size={50} />
+                </Box>
+            </Box>
+        );
+    }
+
     return (
         <>
             <Typography variant="h4" component="h1" gutterBottom>
@@ -138,30 +149,46 @@ const ProductDetailPage = () => {
             </Typography>
 
             <Box>
+                <Paper elevation={3} sx={{ p: 3, mb: 3, borderRadius: 3, background: '#fafcff', boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}>
+                    <Typography variant="h5" gutterBottom sx={{ fontWeight: 700, color: 'black' }}>
+                        {productDetails?.ProductName || 'Product'}
+                    </Typography>
+                    <Divider sx={{ my: 2 }} />
+                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, alignItems: 'center', mb: 2 }}>
+                        <Typography variant="body1" sx={{ minWidth: 120, color: '#555' }}><strong>RxCUI:</strong></Typography>
+                        <Typography variant="body1" sx={{ color: '#222', fontWeight: 500 }}>{id}</Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, alignItems: 'center', mb: 2 }}>
+                        <Typography variant="body1" sx={{ minWidth: 120, color: '#555' }}><strong>Label Source:</strong></Typography>
+                        <Typography variant="body1" sx={{ color: '#222', fontWeight: 500 }}>{productDetails?.Source || 'N/A'}</Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, alignItems: 'center', mb: 2 }}>
+                        <Typography variant="body1" sx={{ minWidth: 120, color: '#555' }}><strong>Source ID:</strong></Typography>
+                        <Typography variant="body1" sx={{ color: '#222', fontWeight: 500 }}>{productDetails?.SourceProductId || 'N/A'}</Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, alignItems: 'center', mb: 2 }}>
+                        <Typography variant="body1" sx={{ minWidth: 120, color: '#555' }}><strong>Label URL:</strong></Typography>
+                        {productDetails?.SourceLabelUrl ? (
+                            <Button
+                                variant="contained"
+                                color="primary"
+                                size="small"
+                                href={productDetails.SourceLabelUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                endIcon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" style={{ marginLeft: 4 }}><path d="M14 3h7v7" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/><path d="M10 14L21 3" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/><path d="M21 21H3V3h7" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>}
+                                sx={{ textTransform: 'none', fontWeight: 500, backgroundColor: 'black' }}
+                            >
+                                View Label
+                            </Button>
+                        ) : (
+                            <Typography variant="body1" sx={{ color: '#888' }}>N/A</Typography>
+                        )}
+                    </Box>
+                </Paper>
 
-                <Typography variant="h6" gutterBottom>
-                    {productDetails?.ProductName}
-                </Typography>
+                <Divider sx={{ my: 3 }} />
 
-                <Typography variant="h6" gutterBottom>
-                    RxCUI: {id}
-                </Typography>
-
-
-
-                <Typography variant="h6" gutterBottom>
-                    Label source: {productDetails?.Source || 'N/A'}
-                </Typography>
-
-                <Typography variant="h6" gutterBottom>
-                    Label source ID: {productDetails?.SourceProductId || 'N/A'}
-                </Typography>
-
-                <Typography variant="h6" gutterBottom>
-                    Label URL: {productDetails?.SourceLabelUrl || 'N/A'}
-                </Typography>
-
-                <Divider />
                 <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>
                     Ingredients
                 </Typography>

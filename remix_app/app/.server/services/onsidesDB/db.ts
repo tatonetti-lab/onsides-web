@@ -228,3 +228,17 @@ export const getAdverseEffect = async (id: string) => {
         `, QueryTypes.SELECT, { id });
     return results;
 }
+
+export const getAllTerms = async () => {
+    if (!sequelize) {
+        await init();
+    }
+    const results = await doRawQuery(`
+        	select meddra_id as term_id, meddra_name as term_name, 'adverseEffect' as term_type from vocab_meddra_adverse_effect vmae 
+	            union all
+	        select rxnorm_id  as term_id, rxnorm_name  as term_name, 'ingredient' as term_type from vocab_rxnorm_ingredient vri 
+	            union all
+	        select rxnorm_id  as term_id, rxnorm_name  as term_name, 'product' as term_type from vocab_rxnorm_product vrp 
+        `, QueryTypes.SELECT, []);
+    return results;
+}
