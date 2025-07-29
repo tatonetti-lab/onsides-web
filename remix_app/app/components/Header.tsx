@@ -88,7 +88,7 @@ export const Header = () => {
             <Link to="/ingredient" className="font-medium flex items-center text-md transition-colors no-underline">
               Ingredients
             </Link>
-            <Link to="/adverse" className="font-medium flex items-center text-md transition-colors no-underline">
+            <Link to="/adverseEffect" className="font-medium flex items-center text-md transition-colors no-underline">
               Adverse Reactions
             </Link>
             <Link to="/download" className="font-medium flex items-center text-md transition-colors no-underline">

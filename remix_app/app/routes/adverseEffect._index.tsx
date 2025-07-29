@@ -5,47 +5,60 @@ import {
 } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { BasePage } from '~/utils/BasePage';
-import { getProducts } from '~/utils/getProducts';
+import { getAdverseEffects } from '~/utils/getAdverseEffects';
 import { useNavigate } from '@remix-run/react';
 
-interface ProductProps {
-  products: Array<{
-    ProductName: string;
-    RxCUI: string;
+interface AdverseEffectProps {
+  adverseEffects: Array<{
+    AdverseEffectId: string;
+    AdverseEffectName: string;
+    AdverseEffectTermType: string;
   }>;
 }
 
-const ProductPage = () => {
-  const [products, setProducts] = useState<ProductProps['products']>([]);
+const AdverseEffectPage = () => {
+  const [adverseEffects, setAdverseEffects] = useState<AdverseEffectProps['adverseEffects']>([]);
   const [page, setPage] = useState(0);
   const [nameFilter, setNameFilter] = useState('');
-  const [rxcuiFilter, setRxcuiFilter] = useState('');
-  const [sort, setSort] = useState<{ column: 'ProductName' | 'RxCUI' | null; direction: 'asc' | 'desc' | null }>({ column: null, direction: null });
+  const [idFilter, setIdFilter] = useState('');
+  const [sort, setSort] = useState<{ column: 'AdverseEffectName' | 'AdverseEffectId' | null; direction: 'asc' | 'desc' | null }>({ column: null, direction: null });
   const rowsPerPage = 10;
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchProducts = async () => {
-      const data = await getProducts();
-      setProducts(data.products);
+    const fetchAdverseEffects = async () => {
+      const data = await getAdverseEffects();
+      console.log('Adverse effects data:', data);
+      console.log('First item structure:', data.adverseEffects?.[0]);
+      // set AdverseEffectId to a string in each item in the array
+      if (data.adverseEffects) {
+        data.adverseEffects.forEach(effect => {
+          if (typeof effect.AdverseEffectId !== 'string') {
+            effect.AdverseEffectId = String(effect.AdverseEffectId);
+          }
+        });
+      }
+      setAdverseEffects(data.adverseEffects || []);
     };
-    fetchProducts();
+    fetchAdverseEffects();
   }, []);
 
-  // Filter logic
-  const filteredProducts = products.filter(product => {
-    const nameMatch = product.ProductName.toLowerCase().includes(nameFilter.toLowerCase());
-    const rxcuiMatch = product.RxCUI.toLowerCase().includes(rxcuiFilter.toLowerCase());
-    return nameMatch && rxcuiMatch;
+  // Filter logic with defensive checks
+  const filteredAdverseEffects = adverseEffects.filter(effect => {
+    const name = effect?.AdverseEffectName || '';
+    const id = effect?.AdverseEffectId || '';
+    const nameMatch = name.toLowerCase().includes(nameFilter.toLowerCase());
+    const idMatch = id.toLowerCase().includes(idFilter.toLowerCase());
+    return nameMatch && idMatch;
   });
 
-  // Sort logic
-  const sortedProducts = (() => {
-    if (!sort.column || !sort.direction) return filteredProducts;
+  // Sort logic with defensive checks
+  const sortedAdverseEffects = (() => {
+    if (!sort.column || !sort.direction) return filteredAdverseEffects;
     const column = sort.column;
-    const sorted = [...filteredProducts].sort((a, b) => {
-      const aVal = a[column] || '';
-      const bVal = b[column] || '';
+    const sorted = [...filteredAdverseEffects].sort((a, b) => {
+      const aVal = (a?.[column] || '').toString();
+      const bVal = (b?.[column] || '').toString();
       if (aVal < bVal) return sort.direction === 'asc' ? -1 : 1;
       if (aVal > bVal) return sort.direction === 'asc' ? 1 : -1;
       return 0;
@@ -53,16 +66,16 @@ const ProductPage = () => {
     return sorted;
   })();
 
-  const paginatedProducts = sortedProducts.slice(page * rowsPerPage, (page + 1) * rowsPerPage);
-  const totalPages = Math.ceil(sortedProducts.length / rowsPerPage);
+  const paginatedAdverseEffects = sortedAdverseEffects.slice(page * rowsPerPage, (page + 1) * rowsPerPage);
+  const totalPages = Math.ceil(sortedAdverseEffects.length / rowsPerPage);
 
   // Reset to first page if filter or sort changes
   useEffect(() => {
     setPage(0);
-  }, [nameFilter, rxcuiFilter, sort]);
+  }, [nameFilter, idFilter, sort]);
 
   // Sort handler
-  const handleSort = (column: 'ProductName' | 'RxCUI') => {
+  const handleSort = (column: 'AdverseEffectName' | 'AdverseEffectId') => {
     setSort(prev => {
       if (prev.column !== column) return { column, direction: 'asc' };
       if (prev.direction === 'asc') return { column, direction: 'desc' };
@@ -72,7 +85,7 @@ const ProductPage = () => {
   };
 
   // Arrow helper
-  const getSortArrow = (column: 'ProductName' | 'RxCUI') => {
+  const getSortArrow = (column: 'AdverseEffectName' | 'AdverseEffectId') => {
     if (sort.column !== column) return '';
     if (sort.direction === 'asc') return ' ▲';
     if (sort.direction === 'desc') return ' ▼';
@@ -82,7 +95,7 @@ const ProductPage = () => {
   return (
     <>
     <Typography variant="h4" component="h1" gutterBottom>
-      Drug Products
+      Adverse Effects
     </Typography>
     {/* Search bar */}
     <div className="flex flex-col sm:flex-row gap-4 mb-4">
@@ -97,7 +110,7 @@ const ProductPage = () => {
         <TextField
           fullWidth
           variant="outlined"
-          placeholder="Filter by Product Name..."
+          placeholder="Filter by Adverse Effect Name..."
           value={nameFilter}
           onChange={e => setNameFilter(e.target.value)}
           InputProps={{
@@ -123,9 +136,9 @@ const ProductPage = () => {
         <TextField
           fullWidth
           variant="outlined"
-          placeholder="Filter by RxCUI..."
-          value={rxcuiFilter}
-          onChange={e => setRxcuiFilter(e.target.value)}
+          placeholder="Filter by MedDRA ID..."
+          value={idFilter}
+          onChange={e => setIdFilter(e.target.value)}
           InputProps={{
             sx: {
               borderRadius: 2,
@@ -145,40 +158,44 @@ const ProductPage = () => {
       <Box sx={{ overflowX: 'auto', borderRadius: 2, boxShadow: 1, width: '100%' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
           <colgroup>
-            <col style={{ width: '85%' }} />
-            <col style={{ width: '15%' }} />
+            <col style={{ width: '70%' }} />
+            <col style={{ width: '30%' }} />
           </colgroup>
           <thead>
             <tr style={{ borderBottom: '1px solid #e0e0e0', background: '#fafafa' }}>
               <th
-                style={{ textAlign: 'left', padding: '12px 16px', fontWeight: 500, color: '#757575', cursor: 'pointer', userSelect: 'none', width: '80%' }}
-                onClick={() => handleSort('ProductName')}
+                style={{ textAlign: 'left', padding: '12px 16px', fontWeight: 500, color: '#757575', cursor: 'pointer', userSelect: 'none', width: '70%' }}
+                onClick={() => handleSort('AdverseEffectName')}
               >
-                Product Name{getSortArrow('ProductName')}
+                Adverse Effect Name{getSortArrow('AdverseEffectName')}
               </th>
               <th
-                style={{ textAlign: 'left', padding: '12px 16px', fontWeight: 500, color: '#757575', cursor: 'pointer', userSelect: 'none', width: '20%' }}
-                onClick={() => handleSort('RxCUI')}
+                style={{ textAlign: 'left', padding: '12px 16px', fontWeight: 500, color: '#757575', cursor: 'pointer', userSelect: 'none', width: '30%' }}
+                onClick={() => handleSort('AdverseEffectId')}
               >
-                RxCUI{getSortArrow('RxCUI')}
+                MedDRA ID{getSortArrow('AdverseEffectId')}
               </th>
             </tr>
           </thead>
           <tbody>
-            {paginatedProducts.map((product, idx) => (
+            {paginatedAdverseEffects.map((effect, idx) => (
               <tr
-                key={product.RxCUI + idx + page * rowsPerPage}
+                key={`${effect?.AdverseEffectId || idx}-${idx}-${page * rowsPerPage}`}
                 style={{
                   borderBottom: '1px solid #e0e0e0',
                   cursor: 'pointer',
                   transition: 'background 0.2s',
                 }}
-                onClick={() => navigate(`/product/${product.RxCUI}`)}
+                onClick={() => navigate(`/adverseEffect/${effect?.AdverseEffectId || ''}`)}
                 onMouseOver={e => (e.currentTarget.style.background = '#f5f5f5')}
                 onMouseOut={e => (e.currentTarget.style.background = '')}
               >
-                <td style={{ padding: '12px 16px', wordBreak: 'break-word', whiteSpace: 'normal' }}>{product.ProductName}</td>
-                <td style={{ padding: '12px 16px' }}>{product.RxCUI}</td>
+                <td style={{ padding: '12px 16px', wordBreak: 'break-word', whiteSpace: 'normal' }}>
+                  {effect?.AdverseEffectName || 'N/A'}
+                </td>
+                <td style={{ padding: '12px 16px' }}>
+                  {effect?.AdverseEffectId || 'N/A'}
+                </td>
               </tr>
             ))}
           </tbody>
@@ -227,8 +244,8 @@ const ProductPage = () => {
   )
 }
 
-export default function ProductRoute() {
+export default function AdverseEffectRoute() {
   return (
-    <BasePage pageInner={<ProductPage />} />
+    <BasePage pageInner={<AdverseEffectPage />} />
   );
 }

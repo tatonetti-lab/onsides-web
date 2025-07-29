@@ -36,3 +36,8 @@ __pycache__
 data
 database.db
 frontend/build
+
+*onsides.db
+*.ipynb*
+
+*node_modules*

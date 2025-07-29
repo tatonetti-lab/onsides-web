@@ -9,7 +9,7 @@ export default function Navbar() {
     { href: "/", label: "Home" },
     { href: "/product", label: "Drug Products" },
     { href: "/ingredient", label: "Ingredients" },
-    { href: "/adverse", label: "Adverse Reactions" },
+    { href: "/adverseEffect", label: "Adverse Reactions" },
     { href: "/download", label: "Download" },
     {
       href: "https://github.com/tatonetti-lab/onsides",
