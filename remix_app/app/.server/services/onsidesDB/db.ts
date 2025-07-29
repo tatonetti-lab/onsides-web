@@ -242,3 +242,18 @@ export const getAllTerms = async () => {
         `, QueryTypes.SELECT, []);
     return results;
 }
+
+export const getStats = async () => {
+    if (!sequelize) {
+        await init();
+    }
+    const results = await doRawQuery(`
+        SELECT 
+            (SELECT COUNT(*) FROM vocab_rxnorm_product) AS product_count,
+            (SELECT COUNT(*) FROM vocab_rxnorm_ingredient) AS ingredient_count,
+            (SELECT COUNT(*) FROM vocab_meddra_adverse_effect) AS adverse_effect_count,
+            (SELECT COUNT(*) FROM product_adverse_effect) AS product_adverse_effect_count
+        LIMIT 1
+        `, QueryTypes.SELECT, []);
+    return results[0];
+}
