@@ -35,24 +35,36 @@ const Home = () => {
     fetchTerms();
   }, []);
 
-  // Debounce search input
+  // Debounce search input with longer delay for better performance
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedSearch(searchValue);
-    }, 200); // 200ms debounce
+    }, 300); // Increased to 300ms for better performance with large dataset
     return () => clearTimeout(handler);
   }, [searchValue]);
 
-  const filteredTerms = React.useMemo(() => (
-    debouncedSearch
-      ? terms.filter(term =>
-          term.term_name.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
-          term.term_id?.toString().toLowerCase().includes(debouncedSearch.toLowerCase())
-        )
-      : []
-  ), [debouncedSearch, terms]);
+  const filteredTerms = React.useMemo(() => {
+    if (!debouncedSearch || debouncedSearch.length < 2) {
+      return []; // Don't search until at least 2 characters
+    }
+    
+    const searchLower = debouncedSearch.toLowerCase();
+    const results = [];
+    
+    // Limit results to prevent UI lag
+    const MAX_RESULTS = 50;
+    
+    for (let i = 0; i < terms.length && results.length < MAX_RESULTS; i++) {
+      const term = terms[i];
+      if (term.term_name.toLowerCase().includes(searchLower) ||
+          term.term_id?.toString().toLowerCase().includes(searchLower)) {
+        results.push(term);
+      }
+    }
+    
+    return results;
+  }, [debouncedSearch, terms]);
 
-  console.log('Terms:', terms);
   return (<>
     <Typography variant="h3" component="h1" gutterBottom>
       OnSIDES
@@ -100,7 +112,7 @@ const Home = () => {
           <Box sx={{ boxShadow: 3, borderRadius: 2, bgcolor: 'background.paper', maxHeight: 320, overflowY: 'auto', border: '1px solid #eee' }}>
             {filteredTerms.map(term => (
               <Box
-                key={term.term_id + term.term_type}
+                key={`${term.term_id}-${term.term_type}`}
                 sx={{
                   display: 'flex',
                   alignItems: 'center',
@@ -123,6 +135,13 @@ const Home = () => {
                 <Typography variant="caption" sx={{ ml: 1, px: 1, py: 0.5, bgcolor: '#222', color: '#fff', borderRadius: 1 }}>{term.term_type}</Typography>
               </Box>
             ))}
+            {debouncedSearch && debouncedSearch.length >= 2 && filteredTerms.length === 50 && (
+              <Box sx={{ px: 2, py: 1, borderTop: '1px solid #f0f0f0', bgcolor: '#f9f9f9' }}>
+                <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                  Showing first 50 results. Type more characters to narrow search.
+                </Typography>
+              </Box>
+            )}
           </Box>
         </Box>
       )}

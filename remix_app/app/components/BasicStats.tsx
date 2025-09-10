@@ -1,22 +1,21 @@
 import { Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Box } from '@mui/material';
-import { getStats } from '~/utils/getStats';
-import { useEffect, useState } from 'react';
-
+// import { getStats } from '~/utils/getStats';
+// import { useEffect, useState } from 'react';
 export const BasicStats = () => {
-  const [stats, setStats] = useState<{
-    product_count?: number;
-    ingredient_count?: number;
-    adverse_effect_count?: number;
-    product_adverse_effect_count?: number;
-  } | null>(null);
+  // const [stats, setStats] = useState<{
+  //   product_count?: number;
+  //   ingredient_count?: number;
+  //   adverse_effect_count?: number;
+  //   product_adverse_effect_count?: number;
+  // } | null>(null);
 
-  useEffect(() => {
-    const fetchStats = async () => {
-      const data = await getStats();
-      setStats(data.stats);
-    };
-    fetchStats();
-  }, []);
+  // useEffect(() => {
+  //   const fetchStats = async () => {
+  //     const data = await getStats();
+  //     setStats(data.stats);
+  //   };
+  //   fetchStats();
+  // }, []);
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
@@ -102,10 +101,10 @@ export const BasicStats = () => {
                 '&:hover': { backgroundColor: 'action.hover' },
               }}
             >
-              <TableCell sx={{ px: 2, py: 1.5 }}>{stats?.product_count != null ? stats.product_count.toLocaleString() : ''}</TableCell>
-              <TableCell sx={{ px: 2, py: 1.5 }}>{stats?.ingredient_count != null ? stats.ingredient_count.toLocaleString() : ''}</TableCell>
-              <TableCell sx={{ px: 2, py: 1.5 }}>{stats?.adverse_effect_count != null ? stats.adverse_effect_count.toLocaleString() : ''}</TableCell>
-              <TableCell sx={{ px: 2, py: 1.5 }}>{stats?.product_adverse_effect_count != null ? stats.product_adverse_effect_count.toLocaleString() : ''}</TableCell>
+              <TableCell sx={{ px: 2, py: 1.5 }}>18,584</TableCell>
+              <TableCell sx={{ px: 2, py: 1.5 }}>2,562</TableCell>
+              <TableCell sx={{ px: 2, py: 1.5 }}>7,177</TableCell>
+              <TableCell sx={{ px: 2, py: 1.5 }}>28,126,418</TableCell>
             </TableRow>
           </TableBody>
         </Table>
