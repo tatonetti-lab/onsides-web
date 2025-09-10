@@ -163,7 +163,8 @@ export const getIngredientAdverseEffects = async (id: string) => {
                 source_product_id,
                 source_label_url,
                 label_section,
-                meddra_name
+                meddra_name,
+                meddra_id
             FROM web_ingredient_adverse_effects_fast
             WHERE ingredient_rxnorm_id = ?
             `, QueryTypes.SELECT, [id]);
@@ -183,7 +184,8 @@ export const getIngredientAdverseEffects = async (id: string) => {
                 pl.source_product_id,
                 pl.source_label_url,
                 pae.label_section,
-                vmae.meddra_name
+                vmae.meddra_name,
+                vmae.meddra_id
             FROM vocab_rxnorm_ingredient vri
             INNER JOIN vocab_rxnorm_ingredient_to_product vritp ON vritp.ingredient_id = vri.rxnorm_id
             INNER JOIN product_to_rxnorm ptr ON vritp.product_id = ptr.rxnorm_product_id

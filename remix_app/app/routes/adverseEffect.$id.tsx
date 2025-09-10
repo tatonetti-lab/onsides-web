@@ -232,8 +232,19 @@ const AdverseEffectDetailPage = () => {
                                 </thead>
                                 <tbody>
                                     {paginatedIngredients.map((ingredient, idx) => (
-                                        <tr key={idx} style={{ borderBottom: '1px solid #e0e0e0', background: idx % 2 === 0 ? '#fff' : '#f9f9f9' }}>
-                                            <td style={{ padding: '12px 16px', color: '#1976d2', cursor: 'pointer', textDecoration: 'underline' }} onClick={() => navigate(`/ingredient/${ingredient.ingredient_id}`)}>{ingredient.ingredient_name}</td>
+                                        <tr 
+                                            key={idx} 
+                                            style={{ 
+                                                borderBottom: '1px solid #e0e0e0', 
+                                                background: idx % 2 === 0 ? '#fff' : '#f9f9f9',
+                                                cursor: 'pointer',
+                                                transition: 'background 0.2s'
+                                            }}
+                                            onClick={() => navigate(`/ingredient/${ingredient.ingredient_id}`)}
+                                            onMouseOver={e => (e.currentTarget.style.background = '#f5f5f5')}
+                                            onMouseOut={e => (e.currentTarget.style.background = idx % 2 === 0 ? '#fff' : '#f9f9f9')}
+                                        >
+                                            <td style={{ padding: '12px 16px' }}>{ingredient.ingredient_name}</td>
                                             <td style={{ padding: '12px 16px' }}>{ingredient.ingredient_id}</td>
                                             <td style={{ padding: '12px 16px' }}>{ingredient.source}</td>
                                             <td style={{ padding: '12px 16px' }}>{ingredient.label_section}</td>
@@ -272,8 +283,19 @@ const AdverseEffectDetailPage = () => {
                                 </thead>
                                 <tbody>
                                     {paginatedProducts.map((product, idx) => (
-                                        <tr key={idx} style={{ borderBottom: '1px solid #e0e0e0', background: idx % 2 === 0 ? '#fff' : '#f9f9f9' }}>
-                                            <td style={{ padding: '12px 16px', color: '#1976d2', cursor: 'pointer', textDecoration: 'underline' }} onClick={() => navigate(`/product/${product.product_id}`)}>{product.product_name}</td>
+                                        <tr 
+                                            key={idx} 
+                                            style={{ 
+                                                borderBottom: '1px solid #e0e0e0', 
+                                                background: idx % 2 === 0 ? '#fff' : '#f9f9f9',
+                                                cursor: 'pointer',
+                                                transition: 'background 0.2s'
+                                            }}
+                                            onClick={() => navigate(`/product/${product.product_id}`)}
+                                            onMouseOver={e => (e.currentTarget.style.background = '#f5f5f5')}
+                                            onMouseOut={e => (e.currentTarget.style.background = idx % 2 === 0 ? '#fff' : '#f9f9f9')}
+                                        >
+                                            <td style={{ padding: '12px 16px' }}>{product.product_name}</td>
                                             <td style={{ padding: '12px 16px' }}>{product.product_id}</td>
                                             <td style={{ padding: '12px 16px' }}>{product.source}</td>
                                             <td style={{ padding: '12px 16px' }}>{product.label_section}</td>

@@ -1,4 +1,4 @@
-import { useParams } from '@remix-run/react';
+import { useParams, useNavigate } from '@remix-run/react';
 import { Typography, Box, Paper, Divider, CircularProgress } from '@mui/material';
 import { BasePage } from '~/utils/BasePage';
 import { useEffect, useState, useMemo } from 'react';
@@ -18,6 +18,7 @@ interface IngredientDetails {
   source_label_url: string;
   label_section: string;
   meddra_name: string;
+  meddra_id: string;
 }
 
 const SectionMapping: Record<string, string> = {
@@ -28,6 +29,7 @@ const SectionMapping: Record<string, string> = {
 
 const IngredientDetailPage = () => {
     const { id } = useParams();
+    const navigate = useNavigate();
     const [ingredient, setIngredient] = useState<{ IngredientName?: string } | null>(null);
     const [ingredientDetails, setIngredientDetails] = useState<IngredientDetails[]>([]);
     const [sources, setSources] = useState<string[]>([]);
@@ -100,8 +102,14 @@ const IngredientDetailPage = () => {
 
     // Create matrix data
     const createMatrix = () => {
-        // Get unique adverse effects and labels
-        const uniqueAdverseEffects = [...new Set(finalFilteredDetails.map(item => item.meddra_name))].sort();
+        // Get unique adverse effects and labels with their IDs
+        const uniqueAdverseEffectsMap = new Map();
+        finalFilteredDetails.forEach(item => {
+            if (!uniqueAdverseEffectsMap.has(item.meddra_name)) {
+                uniqueAdverseEffectsMap.set(item.meddra_name, item.meddra_id);
+            }
+        });
+        const uniqueAdverseEffects = Array.from(uniqueAdverseEffectsMap.keys()).sort();
         const uniqueLabels = [...new Set(finalFilteredDetails.map(item => item.label_id))];
         
         // Sort labels by number of effects (most to least)
@@ -118,7 +126,8 @@ const IngredientDetailPage = () => {
 
         // Create matrix
         const matrix = uniqueAdverseEffects.map(effect => {
-            const row = { effect, percentage: 0, labels: {} as Record<number, boolean> };
+            const effectId = uniqueAdverseEffectsMap.get(effect);
+            const row = { effect, effectId, percentage: 0, labels: {} as Record<number, boolean> };
             
             let labelsWithEffect = 0;
             labelEffectCounts.forEach(({ labelId }) => {
@@ -349,14 +358,19 @@ const IngredientDetailPage = () => {
                                     style={{
                                         borderBottom: '1px solid #e0e0e0',
                                         backgroundColor: rowIndex % 2 === 0 ? '#fff' : '#f9f9f9',
+                                        cursor: 'pointer',
+                                        transition: 'background 0.2s'
                                     }}
+                                    onClick={() => navigate(`/adverseEffect/${row.effectId}`)}
+                                    onMouseOver={e => (e.currentTarget.style.backgroundColor = '#f5f5f5')}
+                                    onMouseOut={e => (e.currentTarget.style.backgroundColor = rowIndex % 2 === 0 ? '#fff' : '#f9f9f9')}
                                 >
                                     <td style={{ 
                                         padding: '12px 16px', 
                                         wordBreak: 'break-word',
                                         position: 'sticky',
                                         left: 0,
-                                        background: rowIndex % 2 === 0 ? '#fff' : '#f9f9f9',
+                                        background: 'inherit',
                                         zIndex: 5,
                                         borderRight: '1px solid #e0e0e0'
                                     }}>
@@ -369,7 +383,7 @@ const IngredientDetailPage = () => {
                                         color: row.percentage > 75 ? '#2e7d32' : row.percentage > 50 ? '#f57f17' : row.percentage > 25 ? '#ed6c02' : '#d32f2f',
                                         position: 'sticky',
                                         left: '200px',
-                                        background: rowIndex % 2 === 0 ? '#fff' : '#f9f9f9',
+                                        background: 'inherit',
                                         zIndex: 5,
                                         borderRight: '1px solid #e0e0e0'
                                     }}>
