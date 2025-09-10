@@ -1,7 +1,7 @@
 import { useParams } from '@remix-run/react';
 import { Typography, Box, Paper, Divider, CircularProgress } from '@mui/material';
 import { BasePage } from '~/utils/BasePage';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { getIngredientAdverseEffects } from '~/utils/getIngredientAdverseEffects';
 import { getIngredientDetails } from '~/utils/getIngredientDetails';
 import saveAs  from 'file-saver';
@@ -73,9 +73,11 @@ const IngredientDetailPage = () => {
     }, [id]);
 
     // Filter ingredient details based on selected source
-    const filteredIngredientDetails = selectedSource === 'All' 
-        ? ingredientDetails 
-        : ingredientDetails.filter(ingredient => ingredient.source === selectedSource);
+    const filteredIngredientDetails = useMemo(() => {
+        return selectedSource === 'All' 
+            ? ingredientDetails 
+            : ingredientDetails.filter(ingredient => ingredient.source === selectedSource);
+    }, [selectedSource, ingredientDetails]);
 
     useEffect(() => {
         const sections = filteredIngredientDetails.map(ingredient => ingredient.label_section);
@@ -83,7 +85,10 @@ const IngredientDetailPage = () => {
         const sortedSections = uniqueSections.sort((a, b) => a.localeCompare(b));
         setSourceLabelSections(sortedSections.filter(section => section !== 'NA'));
         // Reset label section selection when source changes
-        setSelectedLabelSection('All');
+        console.log('sortedSections', sortedSections);
+        if (sortedSections.length === 1 || !sortedSections.includes(selectedLabelSection)) {
+            setSelectedLabelSection('All');
+        }
         // Reset matrix page when source changes
         setMatrixPage(0);
     }, [selectedSource, filteredIngredientDetails]);
