@@ -199,6 +199,85 @@ export const getIngredientAdverseEffects = async (id: string) => {
     }
 }
 
+export const getIngredientWithAdverseEffects = async (id: string) => {
+    if (!sequelize) {
+        await init();
+    }
+    
+    try {
+        // Try the ultra-fast materialized view first with ingredient details
+        const [ingredientResult, adverseEffectsResult] = await Promise.all([
+            doRawQuery(`
+                SELECT 
+                    rxnorm_id as "RxCUI",
+                    rxnorm_name as "IngredientName",
+                    rxnorm_term_type as "TermType"
+                FROM vocab_rxnorm_ingredient
+                WHERE rxnorm_id = ?
+                `, QueryTypes.SELECT, [id]),
+            doRawQuery(`
+                SELECT 
+                    distinct
+                    rxnorm_product_id,
+                    label_id,
+                    source,
+                    source_product_name,
+                    source_product_id,
+                    source_label_url,
+                    label_section,
+                    meddra_name,
+                    meddra_id
+                FROM web_ingredient_adverse_effects_fast
+                WHERE ingredient_rxnorm_id = ?
+                `, QueryTypes.SELECT, [id])
+        ]);
+        
+        return {
+            ingredient: ingredientResult,
+            adverseEffects: adverseEffectsResult
+        };
+    } catch (error) {
+        console.warn("Fast view not available, falling back to optimized queries:", error);
+        
+        // Fallback to optimized queries if materialized view doesn't exist
+        const [ingredientResult, adverseEffectsResult] = await Promise.all([
+            doRawQuery(`
+                SELECT 
+                    rxnorm_id as "RxCUI",
+                    rxnorm_name as "IngredientName",
+                    rxnorm_term_type as "TermType"
+                FROM vocab_rxnorm_ingredient
+                WHERE rxnorm_id = ?
+                `, QueryTypes.SELECT, [id]),
+            doRawQuery(`
+                SELECT 
+                    distinct
+                    ptr.rxnorm_product_id,
+                    pl.label_id,
+                    pl.source,
+                    pl.source_product_name,
+                    pl.source_product_id,
+                    pl.source_label_url,
+                    pae.label_section,
+                    vmae.meddra_name,
+                    vmae.meddra_id
+                FROM vocab_rxnorm_ingredient vri
+                INNER JOIN vocab_rxnorm_ingredient_to_product vritp ON vritp.ingredient_id = vri.rxnorm_id
+                INNER JOIN product_to_rxnorm ptr ON vritp.product_id = ptr.rxnorm_product_id
+                INNER JOIN product_label pl ON ptr.label_id = pl.label_id
+                INNER JOIN product_adverse_effect pae ON pl.label_id = pae.product_label_id
+                INNER JOIN vocab_meddra_adverse_effect vmae ON pae.effect_meddra_id = vmae.meddra_id
+                WHERE vri.rxnorm_id = ?
+                `, QueryTypes.SELECT, [id])
+        ]);
+        
+        return {
+            ingredient: ingredientResult,
+            adverseEffects: adverseEffectsResult
+        };
+    }
+}
+
 export const getIngredientLabels = async (id: string) => {
     if (!sequelize) {
         await init();

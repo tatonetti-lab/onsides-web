@@ -2,7 +2,7 @@ import { useParams, useNavigate } from '@remix-run/react';
 import { Typography, Box, Paper, Divider, CircularProgress } from '@mui/material';
 import { BasePage } from '~/utils/BasePage';
 import { useEffect, useState, useMemo } from 'react';
-import { getIngredientAdverseEffects } from '~/utils/getIngredientAdverseEffects';
+import { getIngredientComplete } from '~/utils/getIngredientComplete';
 import { getIngredientDetails } from '~/utils/getIngredientDetails';
 import saveAs  from 'file-saver';
 import DownloadIcon from '@mui/icons-material/Download';
@@ -42,34 +42,54 @@ const IngredientDetailPage = () => {
     const [matrixPage, setMatrixPage] = useState(0);
     const matrixRowsPerPage = 20;
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         const fetchData = async () => {
-            setLoading(true); // Start loading
+            setLoading(true);
+            setError(null);
             if (!id) return;
             
-            const ingredient = await getIngredientDetails(id);
-            setIngredient(ingredient.ingredient[0] || null);
-
-            const data = await getIngredientAdverseEffects(id);
-            setIngredientDetails(data.ingredient);
-            const sources: string[] = [];
-            for (const ingredient of data.ingredient as IngredientDetails[]) {
-                sources.push(ingredient.source);
+            try {
+                // Use the new optimized API that combines both calls
+                const data = await getIngredientComplete(id);
+                
+                if (!data.success) {
+                    throw new Error(data.error || 'Failed to fetch ingredient data');
+                }
+                
+                // Set ingredient details
+                setIngredient(data.ingredient[0] || null);
+                
+                // Set adverse effects data
+                setIngredientDetails(data.adverseEffects);
+                
+                // Process sources more efficiently
+                const sourcesSet = new Set<string>();
+                const sectionsSet = new Set<string>();
+                const adverseEffectsArray: string[] = [];
+                const labelsArray: string[] = [];
+                
+                for (const item of data.adverseEffects as IngredientDetails[]) {
+                    sourcesSet.add(item.source);
+                    if (item.label_section !== 'NA') {
+                        sectionsSet.add(item.label_section);
+                    }
+                    adverseEffectsArray.push(item.meddra_name);
+                    labelsArray.push(item.label_section);
+                }
+                
+                // Convert sets to sorted arrays
+                setSources(Array.from(sourcesSet).sort());
+                setLabelSections(Array.from(sectionsSet).sort());
+                setAdverseEffects(adverseEffectsArray);
+                setLabels(labelsArray);
+            } catch (err) {
+                console.error('Error fetching ingredient data:', err);
+                setError(err instanceof Error ? err.message : 'An unexpected error occurred');
+            } finally {
+                setLoading(false);
             }
-            const uniqueSources = [...new Set(sources)];
-            const sortedSources = uniqueSources.sort((a: string, b: string) => a.localeCompare(b));
-            setSources(sortedSources);
-
-            const sections = (data.ingredient as IngredientDetails[]).map((ingredient) => ingredient.label_section);
-            const uniqueSections = [...new Set(sections)];
-            const sortedSections = uniqueSections.sort((a: string, b: string) => a.localeCompare(b));
-            // Remove "NA" from sections
-            setLabelSections(sortedSections.filter((section: string) => section !== 'NA'));
-
-            setAdverseEffects((data.ingredient as IngredientDetails[]).map((ingredient) => ingredient.meddra_name));
-            setLabels((data.ingredient as IngredientDetails[]).map((ingredient) => ingredient.label_section));
-            setLoading(false); // End loading after all data is set
         };
         fetchData();
     }, [id]);
@@ -100,40 +120,62 @@ const IngredientDetailPage = () => {
         ? filteredIngredientDetails
         : filteredIngredientDetails.filter(ingredient => ingredient.label_section === selectedLabelSection);
 
-    // Create matrix data
-    const createMatrix = () => {
-        // Get unique adverse effects and labels with their IDs
-        const uniqueAdverseEffectsMap = new Map();
+    // Create matrix data - memoized for better performance
+    const { matrix, labelEffectCounts } = useMemo(() => {
+        if (!finalFilteredDetails.length) {
+            return { matrix: [], labelEffectCounts: [] };
+        }
+        
+        // Pre-process data for faster lookups
+        const effectsMap = new Map<string, { id: string, labelIds: Set<number> }>();
+        const labelInfoMap = new Map<number, { url: string, productName: string }>();
+        
+        // Single pass through the data to build maps
         finalFilteredDetails.forEach(item => {
-            if (!uniqueAdverseEffectsMap.has(item.meddra_name)) {
-                uniqueAdverseEffectsMap.set(item.meddra_name, item.meddra_id);
+            // Build effects map
+            if (!effectsMap.has(item.meddra_name)) {
+                effectsMap.set(item.meddra_name, {
+                    id: item.meddra_id,
+                    labelIds: new Set()
+                });
+            }
+            effectsMap.get(item.meddra_name)!.labelIds.add(item.label_id);
+            
+            // Build label info map
+            if (!labelInfoMap.has(item.label_id)) {
+                labelInfoMap.set(item.label_id, {
+                    url: item.source_label_url || '',
+                    productName: item.source_product_name || ''
+                });
             }
         });
-        const uniqueAdverseEffects = Array.from(uniqueAdverseEffectsMap.keys()).sort();
-        const uniqueLabels = [...new Set(finalFilteredDetails.map(item => item.label_id))];
+        
+        const uniqueLabels = Array.from(labelInfoMap.keys());
         
         // Sort labels by number of effects (most to least)
         const labelEffectCounts = uniqueLabels.map(labelId => {
             const effectCount = finalFilteredDetails.filter(item => item.label_id === labelId).length;
-            const labelInfo = finalFilteredDetails.find(item => item.label_id === labelId);
+            const labelInfo = labelInfoMap.get(labelId)!;
             return {
                 labelId,
                 effectCount,
-                url: labelInfo?.source_label_url || '',
-                productName: labelInfo?.source_product_name || ''
+                url: labelInfo.url,
+                productName: labelInfo.productName
             };
         }).sort((a, b) => b.effectCount - a.effectCount);
-
-        // Create matrix
-        const matrix = uniqueAdverseEffects.map(effect => {
-            const effectId = uniqueAdverseEffectsMap.get(effect);
-            const row = { effect, effectId, percentage: 0, labels: {} as Record<number, boolean> };
+        
+        // Create matrix more efficiently
+        const matrix = Array.from(effectsMap.entries()).map(([effect, effectData]) => {
+            const row = { 
+                effect, 
+                effectId: effectData.id, 
+                percentage: 0, 
+                labels: {} as Record<number, boolean> 
+            };
             
             let labelsWithEffect = 0;
             labelEffectCounts.forEach(({ labelId }) => {
-                const hasEffect = finalFilteredDetails.some(item => 
-                    item.meddra_name === effect && item.label_id === labelId
-                );
+                const hasEffect = effectData.labelIds.has(labelId);
                 row.labels[labelId] = hasEffect;
                 if (hasEffect) labelsWithEffect++;
             });
@@ -142,12 +184,10 @@ const IngredientDetailPage = () => {
                 Math.round((labelsWithEffect / uniqueLabels.length) * 100) : 0;
             
             return row;
-        }).sort((a, b) => b.percentage - a.percentage); // Sort by percentage descending
+        }).sort((a, b) => b.percentage - a.percentage);
 
         return { matrix, labelEffectCounts };
-    };
-
-    const { matrix, labelEffectCounts } = createMatrix();
+    }, [finalFilteredDetails]);
 
     // Pagination for matrix
     const paginatedMatrix = matrix.slice(matrixPage * matrixRowsPerPage, (matrixPage + 1) * matrixRowsPerPage);
@@ -171,26 +211,49 @@ const IngredientDetailPage = () => {
         );
     }
 
+    // Show error state
+    if (error) {
+        return (
+            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '40vh', width: '100%' }}>
+                <Typography variant="h5" color="error" sx={{ mb: 2 }}>Error Loading Ingredient Data</Typography>
+                <Typography variant="body1" sx={{ mb: 2 }}>{error}</Typography>
+                <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                    <button onClick={() => window.location.reload()} 
+                            style={{ padding: '10px 20px', fontSize: '16px', cursor: 'pointer' }}>
+                        Retry
+                    </button>
+                </Box>
+            </Box>
+        );
+    }
+
     // Download matrix as CSV (all filtered rows, not just paginated)
     const handleDownloadMatrix = () => {
-        // Use the full matrix, not just paginatedMatrix
+        // Use the full matrix, not just paginatedMatrix (optimized for better performance)
         if (!matrix.length) return;
-        let csv = 'Adverse Effect,Percentage';
+        
+        const csvLines: string[] = [];
+        
+        // Header row
+        let header = 'Adverse Effect,Percentage';
         labelEffectCounts.forEach((label) => {
-            // Use productName if available, else labelId
-            let colName = label.productName ? label.productName.replace(/"/g, '""') : label.labelId;
-            csv += `,"${colName}"`;
+            const colName = label.productName ? label.productName.replace(/"/g, '""') : label.labelId;
+            header += `,"${colName}"`;
         });
-        csv += '\n';
+        csvLines.push(header);
+        
+        // Data rows
         matrix.forEach(row => {
             let line = `"${row.effect.replace(/"/g, '""')}",${row.percentage}`;
             labelEffectCounts.forEach(label => {
                 line += ',' + (row.labels[label.labelId] ? 'Yes' : '');
             });
-            csv += line + '\n';
+            csvLines.push(line);
         });
+        
+        const csv = csvLines.join('\n');
         const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-        saveAs(blob, 'ingredient-matrix.csv');
+        saveAs(blob, `ingredient-${id}-matrix.csv`);
     };
 
     return (
