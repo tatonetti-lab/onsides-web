@@ -376,7 +376,8 @@ const IngredientDetailPage = () => {
                                     left: 0,
                                     background: '#fafafa',
                                     zIndex: 10,
-                                    minWidth: '200px'
+                                    minWidth: '200px',
+                                    boxShadow: '1px 0 0 0 #e0e0e0'
                                 }}>
                                     Adverse Effect
                                 </th>
@@ -389,7 +390,8 @@ const IngredientDetailPage = () => {
                                     position: 'sticky',
                                     left: '200px',
                                     background: '#fafafa',
-                                    zIndex: 10
+                                    zIndex: 10,
+                                    boxShadow: '1px 0 0 0 #e0e0e0, -1px 0 0 0 #e0e0e0'
                                 }}>
                                     %
                                 </th>
@@ -435,7 +437,7 @@ const IngredientDetailPage = () => {
                                         left: 0,
                                         background: 'inherit',
                                         zIndex: 5,
-                                        borderRight: '1px solid #e0e0e0'
+                                        boxShadow: '1px 0 0 0 #e0e0e0'
                                     }}>
                                         {row.effect}
                                     </td>
@@ -448,7 +450,7 @@ const IngredientDetailPage = () => {
                                         left: '200px',
                                         background: 'inherit',
                                         zIndex: 5,
-                                        borderRight: '1px solid #e0e0e0'
+                                        boxShadow: '1px 0 0 0 #e0e0e0, -1px 0 0 0 #e0e0e0'
                                     }}>
                                         {row.percentage}%
                                     </td>
