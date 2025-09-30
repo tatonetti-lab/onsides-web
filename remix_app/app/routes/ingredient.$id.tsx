@@ -6,6 +6,7 @@ import { getIngredientComplete } from '~/utils/getIngredientComplete';
 import { getIngredientDetails } from '~/utils/getIngredientDetails';
 import saveAs  from 'file-saver';
 import DownloadIcon from '@mui/icons-material/Download';
+import LocalOfferIcon from '@mui/icons-material/LocalOffer';
 import IconButton from '@mui/material/IconButton';
 import Tooltip from '@mui/material/Tooltip';
 
@@ -127,7 +128,7 @@ const IngredientDetailPage = () => {
         }
         
         // Pre-process data for faster lookups
-        const effectsMap = new Map<string, { id: string, labelIds: Set<number> }>();
+        const effectsMap = new Map<string, { id: string, labelIds: Set<number>, sources: Set<string>, labelSections: Set<string> }>();
         const labelInfoMap = new Map<number, { url: string, productName: string }>();
         
         // Single pass through the data to build maps
@@ -136,10 +137,16 @@ const IngredientDetailPage = () => {
             if (!effectsMap.has(item.meddra_name)) {
                 effectsMap.set(item.meddra_name, {
                     id: item.meddra_id,
-                    labelIds: new Set()
+                    labelIds: new Set(),
+                    sources: new Set(),
+                    labelSections: new Set()
                 });
             }
             effectsMap.get(item.meddra_name)!.labelIds.add(item.label_id);
+            effectsMap.get(item.meddra_name)!.sources.add(item.source);
+            if (item.label_section !== 'NA') {
+                effectsMap.get(item.meddra_name)!.labelSections.add(item.label_section);
+            }
             
             // Build label info map
             if (!labelInfoMap.has(item.label_id)) {
@@ -169,6 +176,8 @@ const IngredientDetailPage = () => {
             const row = { 
                 effect, 
                 effectId: effectData.id, 
+                sources: Array.from(effectData.sources).sort().join(', '),
+                labelSections: Array.from(effectData.labelSections).sort().join(', '),
                 percentage: 0, 
                 labels: {} as Record<number, boolean> 
             };
@@ -235,7 +244,7 @@ const IngredientDetailPage = () => {
         const csvLines: string[] = [];
         
         // Header row
-        let header = 'Adverse Effect,Percentage';
+        let header = 'Adverse Effect,Source,Label Section,Percentage';
         labelEffectCounts.forEach((label) => {
             const colName = label.productName ? label.productName.replace(/"/g, '""') : label.labelId;
             header += `,"${colName}"`;
@@ -244,7 +253,7 @@ const IngredientDetailPage = () => {
         
         // Data rows
         matrix.forEach(row => {
-            let line = `"${row.effect.replace(/"/g, '""')}",${row.percentage}`;
+            let line = `"${row.effect.replace(/"/g, '""')}","${row.sources.replace(/"/g, '""')}","${row.labelSections.replace(/"/g, '""')}",${row.percentage}`;
             labelEffectCounts.forEach(label => {
                 line += ',' + (row.labels[label.labelId] ? 'Yes' : '');
             });
@@ -386,12 +395,40 @@ const IngredientDetailPage = () => {
                                     padding: '12px 16px', 
                                     fontWeight: 600, 
                                     color: '#757575',
-                                    width: '80px',
                                     position: 'sticky',
                                     left: '200px',
                                     background: '#fafafa',
                                     zIndex: 10,
-                                    boxShadow: '1px 0 0 0 #e0e0e0, -1px 0 0 0 #e0e0e0'
+                                    minWidth: '100px',
+                                    boxShadow: '1px 0 0 0 #e0e0e0'
+                                }}>
+                                    Source
+                                </th>
+                                <th style={{ 
+                                    textAlign: 'center', 
+                                    padding: '12px 16px', 
+                                    fontWeight: 600, 
+                                    color: '#757575',
+                                    position: 'sticky',
+                                    left: '300px',
+                                    background: '#fafafa',
+                                    zIndex: 10,
+                                    minWidth: '140px',
+                                    boxShadow: '1px 0 0 0 #e0e0e0'
+                                }}>
+                                    Label Section
+                                </th>
+                                <th style={{ 
+                                    textAlign: 'center', 
+                                    padding: '12px 16px', 
+                                    fontWeight: 600, 
+                                    color: '#757575',
+                                    width: '80px',
+                                    position: 'sticky',
+                                    left: '440px',
+                                    background: '#fafafa',
+                                    zIndex: 10,
+                                    boxShadow: '2px 0 4px rgba(0,0,0,0.1)'
                                 }}>
                                     %
                                 </th>
@@ -406,12 +443,14 @@ const IngredientDetailPage = () => {
                                             cursor: 'pointer',
                                             userSelect: 'none',
                                             width: '60px',
-                                            borderLeft: '1px solid #e0e0e0'
+                                            borderLeft: index === 0 ? '2px solid #ddd' : '1px solid #e0e0e0',
+                                            paddingLeft: '8px',
+                                            marginLeft: index === 0 ? '20px' : '0'
                                         }}
                                         onClick={() => window.open(labelInfo.url, '_blank')}
                                         title={`${labelInfo.productName} (${labelInfo.effectCount} effects)`}
                                     >
-                                        {index + 1}
+                                        <LocalOfferIcon fontSize="small" />
                                     </th>
                                 ))}
                             </tr>
@@ -443,24 +482,55 @@ const IngredientDetailPage = () => {
                                     </td>
                                     <td style={{ 
                                         padding: '12px 16px', 
-                                        textAlign: 'center',
-                                        fontWeight: 600,
-                                        color: row.percentage > 75 ? '#2e7d32' : row.percentage > 50 ? '#f57f17' : row.percentage > 25 ? '#ed6c02' : '#d32f2f',
+                                        wordBreak: 'break-word',
+                                        textAlign: 'center', 
                                         position: 'sticky',
                                         left: '200px',
                                         background: 'inherit',
                                         zIndex: 5,
-                                        boxShadow: '1px 0 0 0 #e0e0e0, -1px 0 0 0 #e0e0e0'
+                                        boxShadow: '1px 0 0 0 #e0e0e0',
+                                        fontSize: '12px',
+                                        color: '#666'
+                                    }}>
+                                        {row.sources}
+                                    </td>
+                                    <td style={{ 
+                                        padding: '12px 16px', 
+                                        wordBreak: 'break-word',
+                                        textAlign: 'center', 
+                                        position: 'sticky',
+                                        left: '300px',
+                                        background: 'inherit',
+                                        zIndex: 5,
+                                        boxShadow: '1px 0 0 0 #e0e0e0',
+                                        fontSize: '12px',
+                                        color: '#666'
+                                        
+                                    }}>
+                                        {row.labelSections}
+                                    </td>
+                                    <td style={{ 
+                                        padding: '12px 16px', 
+                                        textAlign: 'center',
+                                        fontWeight: 600,
+                                        color: row.percentage > 75 ? '#2e7d32' : row.percentage > 50 ? '#f57f17' : row.percentage > 25 ? '#ed6c02' : '#d32f2f',
+                                        position: 'sticky',
+                                        left: '440px',
+                                        background: 'inherit',
+                                        zIndex: 5,
+                                        boxShadow: '2px 0 4px rgba(0,0,0,0.1)'
                                     }}>
                                         {row.percentage}%
                                     </td>
-                                    {labelEffectCounts.map((labelInfo) => (
+                                    {labelEffectCounts.map((labelInfo, index) => (
                                         <td 
                                             key={labelInfo.labelId}
                                             style={{ 
                                                 padding: '12px 8px', 
                                                 textAlign: 'center',
-                                                borderLeft: '1px solid #e0e0e0'
+                                                borderLeft: index === 0 ? '2px solid #ddd' : '1px solid #e0e0e0',
+                                                paddingLeft: '8px',
+                                                marginLeft: index === 0 ? '20px' : '0'
                                             }}
                                         >
                                             {row.labels[labelInfo.labelId] ? (
@@ -537,7 +607,7 @@ const IngredientDetailPage = () => {
                     • <span style={{ color: '#ccc', fontSize: '16px' }}>○</span> = Adverse effect not present in this label
                 </Typography>
                 <Typography variant="body2" component="div">
-                    • Column numbers (1, 2, 3...) are clickable and link to the label URL
+                    • Column label icons are clickable and link to the label URL
                 </Typography>
                 <Typography variant="body2" component="div">
                     • Labels are ordered by number of adverse effects (most to least)
