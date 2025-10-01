@@ -47,21 +47,21 @@ const Home = () => {
     if (!debouncedSearch || debouncedSearch.length < 2) {
       return []; // Don't search until at least 2 characters
     }
-    
+
     const searchLower = debouncedSearch.toLowerCase();
     const results = [];
-    
+
     // Limit results to prevent UI lag
     const MAX_RESULTS = 50;
-    
+
     for (let i = 0; i < terms.length && results.length < MAX_RESULTS; i++) {
       const term = terms[i];
       if (term.term_name.toLowerCase().includes(searchLower) ||
-          term.term_id?.toString().toLowerCase().includes(searchLower)) {
+        term.term_id?.toString().toLowerCase().includes(searchLower)) {
         results.push(term);
       }
     }
-    
+
     return results;
   }, [debouncedSearch, terms]);
 
@@ -72,7 +72,7 @@ const Home = () => {
     <Typography variant='body1' gutterBottom>
       A resource of adverse drug effects extracted from FDA structured product labels.
     </Typography>
-    <Divider/>
+    <Divider />
 
     {/* Search bar */}
     <Box sx={{ width: '100%', maxWidth: 480, position: 'relative' }}>
@@ -160,6 +160,32 @@ const Home = () => {
     </Typography>
     <Typography variant="body1" gutterBottom>
       Our fine-tuned language model achieves an F1 score of 0.90, AUROC of 0.92, and AUPR of 0.95 at extracting effects from the ADVERSE REACTIONS section of the FDA drug label. For the BOXED WARNINGS section, the model achieves an F1 score of 0.71, AUROC of 0.85, and AUPR of 0.72. For the WARNINGS AND PRECUATIONS section, the model achieves an F1 score of 0.68, AUROC of 0.66, and AUPR of 0.68. Compared against the reference standard using the official evaluation script for TAC 2017, the model achieves a Micro-F1 score of 0.87 and a Macro-F1 of 0.85.
+    </Typography>
+    <Typography variant="h4" component="h1" gutterBottom>
+      Citation
+    </Typography>
+    <Typography variant="body1">
+      <a href="https://www.sciencedirect.com/science/article/abs/pii/S2666634025000698?via%3Dihub" target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+        View Publication
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M15 3h6v6" />
+          <path d="M10 14 21 3" />
+          <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+        </svg>
+      </a>
+      <code style={{ backgroundColor: '#f5f5f5', padding: '8px', borderRadius: '4px', display: 'block', marginTop: '8px' }}>
+        Tanaka Y, Chen HY, Belloni P, Gisladottir U, Kefeli J, Patterson J, Srinivasan A, Zietz M, Sirdeshmukh G, Berkowitz J, LaRow Brown K, Tatonetti NP. OnSIDES database: Extracting adverse drug events from drug labels using natural language processing models. Med. 2025 Mar 27:100642. doi: 10.1016/j.medj.2025.100642. PMID: 40179876.
+      </code>
     </Typography>
   </>)
 };

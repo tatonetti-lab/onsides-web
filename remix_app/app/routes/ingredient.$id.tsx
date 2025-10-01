@@ -1,14 +1,36 @@
 import { useParams, useNavigate } from '@remix-run/react';
-import { Typography, Box, Paper, Divider, CircularProgress } from '@mui/material';
+import { Typography, Box, CircularProgress } from '@mui/material';
 import { BasePage } from '~/utils/BasePage';
 import { useEffect, useState, useMemo } from 'react';
 import { getIngredientComplete } from '~/utils/getIngredientComplete';
-import { getIngredientDetails } from '~/utils/getIngredientDetails';
 import saveAs  from 'file-saver';
 import DownloadIcon from '@mui/icons-material/Download';
 import LocalOfferIcon from '@mui/icons-material/LocalOffer';
 import IconButton from '@mui/material/IconButton';
 import Tooltip from '@mui/material/Tooltip';
+
+const sourceLabelMap = {
+    'US': 'us_label.png',
+    'UK': 'uk_label.png',
+    'JP': 'jp_label.png',
+    'EU': 'eu_label.png',
+}
+
+// Function to get the appropriate label image based on source
+const getLabelIcon = (source: string) => {
+    const imagePath = sourceLabelMap[source as keyof typeof sourceLabelMap];
+    if (imagePath) {
+        return (
+            <img 
+                src={`/${imagePath}`} 
+                alt={`${source} label`}
+                style={{ width: '20px', height: '20px' }}
+            />
+        );
+    }
+    // Fallback to the generic icon for unknown sources
+    return <LocalOfferIcon fontSize="small" />;
+};
 
 interface IngredientDetails {
   rxnorm_product_id: string;
@@ -129,7 +151,7 @@ const IngredientDetailPage = () => {
         
         // Pre-process data for faster lookups
         const effectsMap = new Map<string, { id: string, labelIds: Set<number>, sources: Set<string>, labelSections: Set<string> }>();
-        const labelInfoMap = new Map<number, { url: string, productName: string }>();
+        const labelInfoMap = new Map<number, { url: string, productName: string, source: string }>();
         
         // Single pass through the data to build maps
         finalFilteredDetails.forEach(item => {
@@ -152,7 +174,8 @@ const IngredientDetailPage = () => {
             if (!labelInfoMap.has(item.label_id)) {
                 labelInfoMap.set(item.label_id, {
                     url: item.source_label_url || '',
-                    productName: item.source_product_name || ''
+                    productName: item.source_product_name || '',
+                    source: item.source
                 });
             }
         });
@@ -167,7 +190,8 @@ const IngredientDetailPage = () => {
                 labelId,
                 effectCount,
                 url: labelInfo.url,
-                productName: labelInfo.productName
+                productName: labelInfo.productName,
+                source: labelInfo.source
             };
         }).sort((a, b) => b.effectCount - a.effectCount);
         
@@ -448,9 +472,9 @@ const IngredientDetailPage = () => {
                                             marginLeft: index === 0 ? '20px' : '0'
                                         }}
                                         onClick={() => window.open(labelInfo.url, '_blank')}
-                                        title={`${labelInfo.productName} (${labelInfo.effectCount} effects)`}
+                                        title={`${labelInfo.productName} (${labelInfo.effectCount} effects) - ${labelInfo.source}`}
                                     >
-                                        <LocalOfferIcon fontSize="small" />
+                                        {getLabelIcon(labelInfo.source)}
                                     </th>
                                 ))}
                             </tr>
