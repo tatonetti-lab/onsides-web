@@ -4,6 +4,8 @@ import { BasePage } from '~/utils/BasePage';
 import { useEffect, useState } from 'react';
 import { getAdverseEffectIngredients } from '~/utils/getAdverseEffectIngredients';
 import { getAdverseEffect } from '~/utils/getAdverseEffect';
+import saveAs from 'file-saver';
+import DownloadIcon from '@mui/icons-material/Download';
 
 interface AdverseEffectDetails {
     AdverseEffectName: string;
@@ -115,6 +117,55 @@ const AdverseEffectDetailPage = () => {
     // Reset page on filter change
     useEffect(() => { setIngredientsPage(0); }, [selectedSource, selectedSection, ingredientNameFilter, ingredientIdFilter]);
     useEffect(() => { setProductsPage(0); }, [selectedSource, selectedSection, productNameFilter, productIdFilter]);
+    
+    // Download handlers
+    const handleDownloadIngredients = () => {
+        if (!filteredIngredients.length) return;
+        
+        const csvLines: string[] = [];
+        
+        // Header row
+        const header = 'Name,ID,Source,Section';
+        csvLines.push(header);
+        
+        // Data rows
+        filteredIngredients.forEach(ingredient => {
+            const name = ingredient.ingredient_name ? `"${ingredient.ingredient_name.replace(/"/g, '""')}"` : '';
+            const id = ingredient.ingredient_id || '';
+            const source = ingredient.source || '';
+            const section = ingredient.label_section || '';
+            
+            csvLines.push(`${name},${id},${source},${section}`);
+        });
+        
+        const csv = csvLines.join('\n');
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        saveAs(blob, `adverse-effect-${id}-ingredients.csv`);
+    };
+    
+    const handleDownloadProducts = () => {
+        if (!filteredProducts.length) return;
+        
+        const csvLines: string[] = [];
+        
+        // Header row
+        const header = 'Name,ID,Source,Section';
+        csvLines.push(header);
+        
+        // Data rows
+        filteredProducts.forEach(product => {
+            const name = product.product_name ? `"${product.product_name.replace(/"/g, '""')}"` : '';
+            const id = product.product_id || '';
+            const source = product.source || '';
+            const section = product.label_section || '';
+            
+            csvLines.push(`${name},${id},${source},${section}`);
+        });
+        
+        const csv = csvLines.join('\n');
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        saveAs(blob, `adverse-effect-${id}-products.csv`);
+    };
 
     if (loading) {
         return (
@@ -219,7 +270,14 @@ const AdverseEffectDetailPage = () => {
 
             {viewType === 'ingredients' ? (
                 <>
-                    <Typography variant="h6" gutterBottom>Ingredients</Typography>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                        <Typography variant="h6">Ingredients</Typography>
+                        {filteredIngredients.length > 0 && (
+                            <Tooltip title="Download ingredients as CSV">
+                                <DownloadIcon onClick={handleDownloadIngredients} color="primary" size="large" />
+                            </Tooltip>
+                        )}
+                    </Box>
                     {filteredIngredients.length > 0 ? (
                         <Box sx={{ overflowX: 'auto', borderRadius: 2, boxShadow: 1, width: '100%', mt: 2 }}>
                             <table style={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'auto' }}>
@@ -270,7 +328,14 @@ const AdverseEffectDetailPage = () => {
                 </>
             ) : (
                 <>
-                    <Typography variant="h6" gutterBottom>Products</Typography>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                        <Typography variant="h6">Products</Typography>
+                        {filteredProducts.length > 0 && (
+                            <Tooltip title="Download products as CSV">
+                                <DownloadIcon onClick={handleDownloadProducts} color="primary" size="large" />
+                            </Tooltip>
+                        )}
+                    </Box>
                     {filteredProducts.length > 0 ? (
                         <Box sx={{ overflowX: 'auto', borderRadius: 2, boxShadow: 1, width: '100%', mt: 2 }}>
                             <table style={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'auto' }}>

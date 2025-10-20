@@ -1,10 +1,12 @@
 import { useParams, useNavigate } from '@remix-run/react';
-import { Typography, Box, Paper, Divider, CircularProgress, Button } from '@mui/material';
+import { Typography, Box, Paper, Divider, CircularProgress, Button, IconButton, Tooltip } from '@mui/material';
 import { BasePage } from '~/utils/BasePage';
 import { useEffect, useState } from 'react';
 import { getProductDetails } from '~/utils/getProductDetails';
 import { getProductIngredients } from '~/utils/getProductIngredients';
 import { getProductAdverseEffects } from '~/utils/getProductAdverseEffects';
+import saveAs from 'file-saver';
+import DownloadIcon from '@mui/icons-material/Download';
 
 interface AdverseEffect {
     section: string;
@@ -131,6 +133,54 @@ const ProductDetailPage = () => {
     );
     const adverseEffectsTotalPages = Math.ceil(sortedAdverseEffects.length / rowsPerPage);
 
+    // Download handlers
+    const handleDownloadIngredients = () => {
+        if (!sortedIngredients.length) return;
+        
+        const csvLines: string[] = [];
+        
+        // Header row
+        const header = 'Name,RxNorm CUI,Term Type';
+        csvLines.push(header);
+        
+        // Data rows
+        sortedIngredients.forEach(ingredient => {
+            const name = ingredient.IngredientName ? `"${ingredient.IngredientName.replace(/"/g, '""')}"` : '';
+            const rxNormCUI = ingredient.RxNormCUI || '';
+            const termType = ingredient.TermType || '';
+            
+            csvLines.push(`${name},${rxNormCUI},${termType}`);
+        });
+        
+        const csv = csvLines.join('\n');
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        saveAs(blob, `product-${id}-ingredients.csv`);
+    };
+    
+    const handleDownloadAdverseEffects = () => {
+        if (!sortedAdverseEffects.length) return;
+        
+        const csvLines: string[] = [];
+        
+        // Header row
+        const header = 'ID,Name,Term Type,Section';
+        csvLines.push(header);
+        
+        // Data rows
+        sortedAdverseEffects.forEach(effect => {
+            const id = effect.id || '';
+            const name = effect.name ? `"${effect.name.replace(/"/g, '""')}"` : '';
+            const termType = effect.termtype || '';
+            const section = effect.section || 'N/A';
+            
+            csvLines.push(`${id},${name},${termType},${section}`);
+        });
+        
+        const csv = csvLines.join('\n');
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        saveAs(blob, `product-${id}-adverse-effects.csv`);
+    };
+
     if (loading) {
         return (
             <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '40vh', width: '100%' }}>
@@ -189,9 +239,14 @@ const ProductDetailPage = () => {
 
                 <Divider sx={{ my: 3 }} />
 
-                <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>
-                    Ingredients
-                </Typography>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 2 }}>
+                    <Typography variant="h6">Ingredients</Typography>
+                    {productIngredients.length > 0 && (
+                        <Tooltip title="Download ingredients as CSV">
+                            <DownloadIcon onClick={handleDownloadIngredients} color="primary" size="large" />
+                        </Tooltip>
+                    )}
+                </Box>
 
                 {productIngredients.length > 0 ? (
                     <Box sx={{ overflowX: 'auto', borderRadius: 2, boxShadow: 1, width: '100%', mt: 2 }}>
@@ -288,9 +343,14 @@ const ProductDetailPage = () => {
 
                 <Divider sx={{ my: 3 }} />
 
-                <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>
-                    Adverse Effects
-                </Typography>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 2 }}>
+                    <Typography variant="h6">Adverse Effects</Typography>
+                    {productAdverseEffects.length > 0 && (
+                        <Tooltip title="Download adverse effects as CSV">
+                            <DownloadIcon onClick={handleDownloadAdverseEffects} color="primary" size="large" />
+                        </Tooltip>
+                    )}
+                </Box>
                 
                 {productAdverseEffects.length > 0 ? (
                     <Box sx={{ overflowX: 'auto', borderRadius: 2, boxShadow: 1, width: '100%', mt: 2 }}>
