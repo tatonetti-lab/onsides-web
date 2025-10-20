@@ -1,6 +1,13 @@
 import { Link } from "@remix-run/react";
+import { useState } from "react";
 
 export const Header = () => {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  const toggleMenu = () => {
+    setIsMenuOpen(!isMenuOpen);
+  };
+
   return (
     <nav className="fixed inset-x-0 top-0 z-50 shadow-sm bg-white">
       <div className="w-full max-w-7xl mx-auto px-4">
@@ -30,7 +37,7 @@ export const Header = () => {
           </Link>
 
           <div className="flex gap-2 md:hidden">
-            <button
+            {/* <button
               className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-800"
               aria-label="Toggle Theme"
             >
@@ -48,15 +55,16 @@ export const Header = () => {
               >
                 <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
               </svg>
-            </button>
+            </button> */}
 
             <button
               type="button"
               className="md:hidden inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-10 w-10"
               aria-haspopup="dialog"
-              aria-expanded="false"
+              aria-expanded={isMenuOpen ? "true" : "false"}
               aria-controls="mobile-menu"
-              data-state="closed"
+              data-state={isMenuOpen ? "open" : "closed"}
+              onClick={toggleMenu}
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -77,6 +85,74 @@ export const Header = () => {
               <span className="sr-only">Toggle menu</span>
             </button>
           </div>
+
+          {/* Mobile menu dropdown */}
+          {isMenuOpen && (
+            <div className="absolute top-16 inset-x-0 bg-white shadow-md py-3 px-4 md:hidden z-50">
+              <div className="flex flex-col space-y-4">
+                <Link 
+                  to="/" 
+                  className="font-medium text-md transition-colors no-underline py-2"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Home
+                </Link>
+                <Link 
+                  to="/product" 
+                  className="font-medium text-md transition-colors no-underline py-2"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Drug Products
+                </Link>
+                <Link 
+                  to="/ingredient" 
+                  className="font-medium text-md transition-colors no-underline py-2"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Ingredients
+                </Link>
+                <Link 
+                  to="/adverseEffect" 
+                  className="font-medium text-md transition-colors no-underline py-2"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Adverse Reactions
+                </Link>
+                <Link 
+                  to="/download" 
+                  className="font-medium text-md transition-colors no-underline py-2"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Download
+                </Link>
+                <a
+                  href="https://github.com/tatonetti-lab/onsides"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-medium flex items-center text-md transition-colors no-underline py-2"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Source Code
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="lucide lucide-external-link ml-1 h-4 w-4"
+                  >
+                    <path d="M15 3h6v6" />
+                    <path d="M10 14 21 3" />
+                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                  </svg>
+                </a>
+              </div>
+            </div>
+          )}
 
           <nav className="hidden md:flex gap-4">
             <Link to="/" className="font-medium flex items-center text-md transition-colors no-underline">
@@ -119,7 +195,7 @@ export const Header = () => {
               </svg>
             </a>
 
-            <button
+            {/* <button
               className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-800"
               aria-label="Toggle Theme"
             >
@@ -137,7 +213,7 @@ export const Header = () => {
               >
                 <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
               </svg>
-            </button>
+            </button> */}
           </nav>
         </div>
       </div>

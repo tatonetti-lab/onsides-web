@@ -126,7 +126,8 @@ const AdverseEffectDetailPage = () => {
             </Box>
         );
     }
-
+    console.log('Filtered ingredients:', filteredIngredients);
+    console.log('Filtered products:', filteredProducts);
     return (
         <>
             <Typography variant="h4" component="h1" gutterBottom>
