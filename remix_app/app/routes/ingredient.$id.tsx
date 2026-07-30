@@ -1,5 +1,6 @@
 import { useParams, useNavigate } from '@remix-run/react';
-import { Typography, Box, CircularProgress } from '@mui/material';
+import { Typography, Box, CircularProgress, TextField, InputAdornment } from '@mui/material';
+import SearchIcon from '@mui/icons-material/Search';
 import { BasePage } from '~/utils/BasePage';
 import { useEffect, useState, useMemo } from 'react';
 import { getIngredientComplete } from '~/utils/getIngredientComplete';
@@ -60,6 +61,7 @@ const IngredientDetailPage = () => {
     const [labelSections, setLabelSections] = useState<string[]>([]);
     const [selectedLabelSection, setSelectedLabelSection] = useState<string>('All');
     const [sourceLabelSections, setSourceLabelSections] = useState<string[]>([]);
+    const [effectFilter, setEffectFilter] = useState('');
     const [adverseEffects, setAdverseEffects] = useState<string[]>([]);
     const [labels, setLabels] = useState<string[]>([]);
     const [matrixPage, setMatrixPage] = useState(0);
@@ -222,14 +224,25 @@ const IngredientDetailPage = () => {
         return { matrix, labelEffectCounts };
     }, [finalFilteredDetails]);
 
+    // Filter matrix rows by adverse effect text query (matches effect name, source, or label section)
+    const filteredMatrix = useMemo(() => {
+        const query = effectFilter.trim().toLowerCase();
+        if (!query) return matrix;
+        return matrix.filter(row =>
+            row.effect.toLowerCase().includes(query) ||
+            row.sources.toLowerCase().includes(query) ||
+            row.labelSections.toLowerCase().includes(query)
+        );
+    }, [matrix, effectFilter]);
+
     // Pagination for matrix
-    const paginatedMatrix = matrix.slice(matrixPage * matrixRowsPerPage, (matrixPage + 1) * matrixRowsPerPage);
-    const matrixTotalPages = Math.ceil(matrix.length / matrixRowsPerPage);
+    const paginatedMatrix = filteredMatrix.slice(matrixPage * matrixRowsPerPage, (matrixPage + 1) * matrixRowsPerPage);
+    const matrixTotalPages = Math.ceil(filteredMatrix.length / matrixRowsPerPage);
 
     // Reset matrix page when filters change
     useEffect(() => {
         setMatrixPage(0);
-    }, [selectedLabelSection]);
+    }, [selectedLabelSection, effectFilter]);
 
 
     // Show loading spinner until matrix is ready
@@ -262,11 +275,11 @@ const IngredientDetailPage = () => {
 
     // Download matrix as CSV (all filtered rows, not just paginated)
     const handleDownloadMatrix = () => {
-        // Use the full matrix, not just paginatedMatrix (optimized for better performance)
-        if (!matrix.length) return;
-        
+        // Download the filtered matrix so it matches what the user sees
+        if (!filteredMatrix.length) return;
+
         const csvLines: string[] = [];
-        
+
         // Header row
         let header = 'Adverse Effect,Source,Label Section,Percentage';
         labelEffectCounts.forEach((label) => {
@@ -274,9 +287,9 @@ const IngredientDetailPage = () => {
             header += `,"${colName}"`;
         });
         csvLines.push(header);
-        
+
         // Data rows
-        matrix.forEach(row => {
+        filteredMatrix.forEach(row => {
             let line = `"${row.effect.replace(/"/g, '""')}","${row.sources.replace(/"/g, '""')}","${row.labelSections.replace(/"/g, '""')}",${row.percentage}`;
             labelEffectCounts.forEach(label => {
                 line += ',' + (row.labels[label.labelId] ? 'Yes' : '');
@@ -385,8 +398,22 @@ const IngredientDetailPage = () => {
                 })}
             </Box>
 
-            {/* Download Matrix Button */}
-            <Box sx={{ display: 'flex', justifyContent: 'flex-end'}}>
+            {/* Filter + Download Matrix Button */}
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 2, mt: 2 }}>
+                <TextField
+                    size="small"
+                    placeholder="Filter adverse effects by name, source, or label section..."
+                    value={effectFilter}
+                    onChange={e => setEffectFilter(e.target.value)}
+                    sx={{ flexGrow: 1, maxWidth: 500 }}
+                    InputProps={{
+                        startAdornment: (
+                            <InputAdornment position="start">
+                                <SearchIcon fontSize="small" />
+                            </InputAdornment>
+                        ),
+                    }}
+                />
                 <Tooltip title="Download matrix as CSV">
                     <IconButton onClick={handleDownloadMatrix} color="primary" size="large">
                         <DownloadIcon />
@@ -395,7 +422,7 @@ const IngredientDetailPage = () => {
             </Box>
 
             {/* Matrix Table */}
-            {finalFilteredDetails.length > 0 ? (
+            {filteredMatrix.length > 0 ? (
                 <Box sx={{ overflowX: 'auto', borderRadius: 2, boxShadow: 1, width: '100%'}}>
                     <table style={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'auto' }}>
                         <thead>
@@ -571,12 +598,14 @@ const IngredientDetailPage = () => {
                 </Box>
             ) : (
                 <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
-                    No data available for the selected filters.
+                    {matrix.length > 0
+                        ? 'No adverse effects match your filter.'
+                        : 'No data available for the selected filters.'}
                 </Typography>
             )}
 
             {/* Matrix Pagination Controls */}
-            {matrix.length > matrixRowsPerPage && (
+            {filteredMatrix.length > matrixRowsPerPage && (
                 <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', mt: 2, gap: 2 }}>
                     <button
                         onClick={() => setMatrixPage(p => Math.max(0, p - 1))}
@@ -598,7 +627,7 @@ const IngredientDetailPage = () => {
                         Page {matrixTotalPages === 0 ? 0 : matrixPage + 1} of {matrixTotalPages || 1}
                     </span>
                     <span style={{ color: '#757575', fontSize: '14px', marginLeft: 8 }}>
-                        ({matrix.length} total adverse effects)
+                        ({filteredMatrix.length} total adverse effects)
                     </span>
                     <button
                         onClick={() => setMatrixPage(p => Math.min(matrixTotalPages - 1, p + 1))}

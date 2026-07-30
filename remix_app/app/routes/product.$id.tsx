@@ -1,5 +1,6 @@
 import { useParams, useNavigate } from '@remix-run/react';
-import { Typography, Box, Paper, Divider, CircularProgress, Button, IconButton, Tooltip } from '@mui/material';
+import { Typography, Box, Paper, Divider, CircularProgress, Button, IconButton, Tooltip, TextField, InputAdornment } from '@mui/material';
+import SearchIcon from '@mui/icons-material/Search';
 import { BasePage } from '~/utils/BasePage';
 import { useEffect, useState } from 'react';
 import { getProductDetails } from '~/utils/getProductDetails';
@@ -38,6 +39,7 @@ const ProductDetailPage = () => {
     const [adverseEffectsPage, setAdverseEffectsPage] = useState(0);
     const [ingredientsSort, setIngredientsSort] = useState<{ column: keyof Ingredient | null; direction: 'asc' | 'desc' | null }>({ column: null, direction: null });
     const [adverseEffectsSort, setAdverseEffectsSort] = useState<{ column: keyof AdverseEffect | null; direction: 'asc' | 'desc' | null }>({ column: null, direction: null });
+    const [adverseEffectsFilter, setAdverseEffectsFilter] = useState('');
     const rowsPerPage = 10;
     const [loading, setLoading] = useState(true);
 
@@ -106,11 +108,22 @@ const ProductDetailPage = () => {
         return sorted;
     })();
 
+    // Filter adverse effects by text query (matches name, term type, or section)
+    const filteredAdverseEffects = (() => {
+        const query = adverseEffectsFilter.trim().toLowerCase();
+        if (!query) return productAdverseEffects;
+        return productAdverseEffects.filter(effect =>
+            (effect.name || '').toLowerCase().includes(query) ||
+            (effect.termtype || '').toLowerCase().includes(query) ||
+            (effect.section || '').toLowerCase().includes(query)
+        );
+    })();
+
     // Sort logic for adverse effects
     const sortedAdverseEffects = (() => {
-        if (!adverseEffectsSort.column || !adverseEffectsSort.direction) return productAdverseEffects;
+        if (!adverseEffectsSort.column || !adverseEffectsSort.direction) return filteredAdverseEffects;
         const column = adverseEffectsSort.column;
-        const sorted = [...productAdverseEffects].sort((a, b) => {
+        const sorted = [...filteredAdverseEffects].sort((a, b) => {
             const aVal = a[column] || '';
             const bVal = b[column] || '';
             if (aVal < bVal) return adverseEffectsSort.direction === 'asc' ? -1 : 1;
@@ -351,13 +364,31 @@ const ProductDetailPage = () => {
                         </Tooltip>
                     )}
                 </Box>
-                
-                {productAdverseEffects.length > 0 ? (
+
+                {productAdverseEffects.length > 0 && (
+                    <TextField
+                        fullWidth
+                        size="small"
+                        placeholder="Filter adverse effects by name, term type, or section..."
+                        value={adverseEffectsFilter}
+                        onChange={e => { setAdverseEffectsFilter(e.target.value); setAdverseEffectsPage(0); }}
+                        sx={{ mt: 2 }}
+                        InputProps={{
+                            startAdornment: (
+                                <InputAdornment position="start">
+                                    <SearchIcon fontSize="small" />
+                                </InputAdornment>
+                            ),
+                        }}
+                    />
+                )}
+
+                {sortedAdverseEffects.length > 0 ? (
                     <Box sx={{ overflowX: 'auto', borderRadius: 2, boxShadow: 1, width: '100%', mt: 2 }}>
                         <table style={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'auto' }}>
                             <thead>
                                 <tr style={{ borderBottom: '1px solid #e0e0e0', background: '#fafafa' }}>
-                                    <th 
+                                    <th
                                         style={{ textAlign: 'left', padding: '12px 16px', fontWeight: 500, color: '#757575', width: '15%', cursor: 'pointer', userSelect: 'none' }}
                                         onClick={() => handleAdverseEffectsSort('id')}
                                     >
@@ -407,7 +438,9 @@ const ProductDetailPage = () => {
                     </Box>
                 ) : (
                     <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                        No adverse effects available.
+                        {productAdverseEffects.length > 0
+                            ? 'No adverse effects match your filter.'
+                            : 'No adverse effects available.'}
                     </Typography>
                 )}
 

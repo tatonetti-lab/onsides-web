@@ -88,7 +88,7 @@ const ProductPage = () => {
         <Button
           variant="contained"
           color="primary"
-          href="https://github.com/tatonetti-lab/onsides/releases/latest"
+          href="https://github.com/tatonetti-lab/onsides/releases/tag/v3.1.1"
           target="_blank"
           rel="noopener noreferrer"
           sx={{ backgroundColor: '#000', color: '#fff', '&:hover': { backgroundColor: '#222', color: '#fff' } }}
